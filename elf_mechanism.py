@@ -32,7 +32,6 @@ class ElfInstance:
         adj = self.inverse_agent_count_off_one * quadratic_score_no_agent
         adjustment = self.inverse_agent_count * (agent_quadratic_score - adj)
 
-
         score += adjustment
 
         return score
@@ -68,10 +67,24 @@ class ElfInstance:
 
     '''
     Gets the argmax over the agent wins returning the index of agent with
-    the most event wins.
+    the most event wins. Breaking ties uniformly
     '''
     def get_competition_winner(self):
-        winner = max(self.agent_wins.items(), key=operator.itemgetter(1))[0]
+        max_wins = -1
+        bucketed_wins = {}
+        for agent in self.agent_wins:
+            win_number = self.agent_wins[agent]
+            if win_number not in bucketed_wins:
+                bucketed_wins[win_number] = [agent]
+            else:
+                bucketed_wins[win_number].append(agent)
+
+            if win_number > max_wins:
+                max_wins = win_number
+
+        highest_winners = bucketed_wins[max_wins]
+        winner = np.random.choice(a=highest_winners)
+
         return winner
 
 
