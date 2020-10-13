@@ -17,7 +17,7 @@ class Experiment:
     truth = 1, gap = -0.5, naive_report = 0.5
     truth = 0.5, gap = 0.1 naive_report = 0.6
     '''
-    def run_m_events_uniform_gap(self, epochs, m, truth, gap):
+    def run_m_events_uniform_gap(self, epochs, m, truth, gap, competition):
         naive_report = truth + gap
         reports = np.ones(self.agent_count) * naive_report
 
@@ -26,7 +26,6 @@ class Experiment:
 
         success_count = 0
         for _ in range(epochs):
-            competition = elf_mechanism.ElfInstance(self.agent_count)
             for __ in range(m):
                 competition.run_event(reports=reports, truth=truth)
 
@@ -60,9 +59,11 @@ class Experiment:
 
 
 if __name__ == '__main__':
-    experiment = Experiment(agent_count=10)
+    agent_count = 10
+    experiment = Experiment(agent_count=agent_count)
     m_range = np.array(range(100,5001,100))
     truth = 0.5
     gap = -0.4
     method = experiment.run_m_events_uniform_gap
-    experiment.experiment_varying_m_uniform_gap(m_range, truth, gap, method)
+    competition = elf_mechanism.ElfInstance(agent_count)
+    experiment.experiment_varying_m_uniform_gap(m_range, truth, gap, method, competition)
