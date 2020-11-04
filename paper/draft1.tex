@@ -1,0 +1,225 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage[margin=1.5in]{geometry}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bbm}
+\usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{hyperref}
+\lstset{
+  tabsize=2
+}
+
+
+\renewenvironment{abstract}
+ {
+  \begin{center}
+  \vspace{3em} \bfseries \abstractname\vspace{0em}\vspace{0pt}
+  \end{center}
+  \list{}{%
+    \setlength{\leftmargin}{20mm}% <---------- CHANGE HERE
+    \setlength{\rightmargin}{\leftmargin}%
+  }%
+  \item\relax}
+ {\endlist}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\Var}{Var}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\1}{\mathbbm{1}}
+\newcommand*{\QED}{\hfill\ensuremath{\square}}%
+
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+
+
+\begin{document}
+
+% \title{ELF}
+% \author{Anish Thilagar}
+% \date{\today}
+% \maketitle
+
+
+% \begin{abstract}
+ 
+% \end{abstract}
+
+
+\section{Definitions}
+We model a forecasting competition as $m$ independent events denoted by the independent binary random variables $X_i \in \{0, 1\}$ for $1 \leq i \leq m$. Specifically, let $\theta_i = P(X_i = 1) = 1 - P(X_i = 0)$. For each event event, we draw the outcome for the event $x_i \sim X_i$. We say event $i$ occurred when and only when $x_i = 1$. 
+
+define selection mechanism
+
+define accuracy
+
+define proper scoring rule
+
+define truthful mechanism
+
+define accuracy gap
+
+\subsection{Truthfulness using FSD}
+Let $p_i$ represent the set of true beliefs $i$ holds over all $m$ events\\\\
+Let $y_{i}^{t}$ denote the set of $i$'s reports s.t. for every $k; y_{i,k}^{t} = p_{i,k}$\\\\
+Let $y_{i}^{\overline{t}}$ denote the set of $i$'s reports s.t. for every $k; y_{i,k}^{\overline{t}} \ne p_{i,k}$\\\\
+Let $G$ denote the cumulative distribution function over a lottery where $y_i = y_{i}^{t}$ and $H$ denote the cumulative distribution function over a lottery where $y_i = y_{i}^{\overline{t}}$\\\\
+Lemma 1: A scoring mechanism is truthful iff 
+$$\forall x; G(x) \le H(x)$$
+$$\exists x; G(x) < H(x)$$ 
+which is to say $G$ has first order stochastic dominance over $H$.\\\\
+This qualifies as a valid definition for a truthful mechanism because, if $G$ stochastically dominates $H$, then for every possible outcome, given some increasing utility function $U$, any given maximization of $U$ prefers the reports $y_{i}^{t}$ over the reports $y_{i}^{\overline{t}}$. This is to say that truthful reports are always preferred over non-truthful reports which constitutes truthfulness.\\\\\\
+SHELF Truthfulness\\\\
+
+\section{Simple average mechanism}
+The simplest selection mechanism (and what is often done in practice), we call the simple average mechanism. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $\argmax_i F_i$. Each forecaster's cumulative score in this mechanism $\sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_j = \sum_{i=1}^m 1 - (y_{i, j} - \theta_j)^2$. However, we will show that this approximation can be flawed.
+
+\subsection{Truthfulness}
+show simple counterexample(s?) \\
+- single event favors extremes \\
+- multiple events can be dominated by single untruthful event when rest are isomorphic \\
+
+\subsection{Accuracy}
+
+Assume forecasters remain honest. For single events, the most extreme forecasters will get selected. 
+
+For multiple events, we will see that we get similar accuracy bounds as the SHELF mechanism, assuming the forecasters remain honest. In fact, the main advantage of SHELF is that it is as efficient as the Naive mechanism, but also elicits truthful forecasts.
+
+\section{ELF}
+The ELF mechanism, introduced in/by [cite elf paper], improves upon the Naive mechanism, by incentivizing forecasters to be truthful. For each event $k$, we hold a lottery to choose a winner. Forecaster $i$ is chosen with probability
+\[ f_{i, k} = \frac{1}{n} + \frac{1}{n} \left(R_q(y_{i, k}, x_k) - \frac{\sum_{j\neq i} R_q(y_{j, k}, x_k)}{n-1} \right)\]
+This score is the additively normalized quadratic score among all forecasters. A forecaster increasing their own quadratic score increases the chances they win an event, while decreasing the chances others win that event. Let $w_k$ be the winner of event $k$. The ELF mechanism, $M_l$, then chooses $\argmax_i \sum_{k=1}^m \1(w_k = i)$ as the winner of the competition. Essentially, we give the winner of each event a point, and then pick the forecaster who got the most points.
+
+In [elf paper] Theorem 6, they show that ELF is strictly truthful. In Theorem 8, they also show it is accurate. Specifically, that for an accuracy gap of $\epsilon$, that ELF chooses the most accurate forecaster with probability $ \geq 1 - \delta$ if
+\[ m \geq \frac{2(n-1)^2}{\epsilon^2} \ln \left(\frac{4(n-1)}{\delta}\right)\]
+For a fixed forecaster accuracy gap and mechanism accuracy, the number of events ELF needs is proportional to $n^2 \ln n$. However, this lower bound is not tight, and can be improved. 
+
+Let $F_{i, k}$ be the indicator function for forecaster $i$ winning event $k$. Then, $F_i = \sum_k F_{i, k}$ is the random variable that is the number of events forecaster $i$ wins. The proof of [elf paper] Theorem 8 utilized the Hoeffding bound applied to $F_i$, which assumes they have high variance. However, this is not the case, which leads to an improvement in the lower bound. 
+\begin{theorem}[Bernstein's Inequality]
+  \label{bernstein}
+  Given random variables $X_i$ for $1 \leq i \leq n$ such that $0 \leq X_i \leq 1$ almost surely, let $S = \sum_i X_i$. Then,
+  \[ P\left(|S - \E[S]| < t\right) < 2 \: e^{\frac{-t^2 }{2\left(\Var(S) + \frac{t}{3}\right)} } \]
+\end{theorem}
+\begin{theorem}
+  \label{elf_bound}
+  For an accuracy gap $\epsilon$, ELF correctly chooses the most accurate forecaster with probability at least $1 - 4 (n-1) e^{-\frac{m \epsilon}{6(n - 1)}}$.
+\end{theorem}
+\emph{Proof:} Note that for any single event $k$, every forecaster wins with probability at best $\frac{2}{n}$, and at worst $\frac{1}{n} - \frac{1}{n(n-1)}$ (achieved when $y_i = 1$, $y_{j\neq i} = 0$, and $x_i = 1$). Since $F_{i, k}$ is just a binary random variable, it will have highest variance when it's expectation is as close to $\frac{1}{2}$ as possible. For nontrivially small $n$, this will mean its expectation is $\frac{2}{n}$ (or equivalently $P(F_{i, k} = 1) = \frac{2}{n}$), so its variance will be at most $\frac{2(n-2)}{n^2}$. So we have $\Var(F_{i, k}) \leq \frac{2(n-2)}{n^2} < \frac{2}{n}$. 
+
+Since $F_i = \sum_k F_{i, k}$, we have $\Var(F_i) = \sum_k \Var(F_{i, k}) < \sum_k \frac{2}{n} = \frac{2m}{n}$. As shown in [elf paper], for $j\neq i$ we have 
+\[ \E[F_i] - \E[F_j] \geq \frac{m \epsilon}{n - 1}\]
+Therefore, if $F_j \geq F_i$, (forecaster $j$ beats forecaster $i$), then either forecaster $j$ overperformed their expectation by at least $\frac{m \epsilon}{2(n - 1)}$, or forecaster $i$ underperformed their expectation by $\frac{m \epsilon}{n - 1}$. Specifically, either $\E[F_i] - F_i \geq \frac{m \epsilon}{2(n - 1)}$ or $F_j - \E[F_j] \geq \frac{m \epsilon}{2(n - 1)}$
+
+Applying Theorem \ref{bernstein}, we have
+\begin{align*}
+    P\left(\left| F_i - \E[F_i]\right| < \frac{m \epsilon}{2(n - 1)} \right) 
+    &< 2 \: e^{\frac{-\left(\frac{m \epsilon}{2(n - 1)}\right)^2 }{2\left(\frac{2m}{n} + \frac{m \epsilon}{6(n - 1)}\right)}} \\
+    &< 2 \: e^{\frac{-\left(\frac{m \epsilon}{2(n - 1)}\right)^2 }{2\left(\frac{m}{n-1}(2 + \frac{\epsilon}{6}) \right)}} \\
+    &= 2 \: e^{\frac{-\frac{m \epsilon^2}{2(n - 1)} }{(2 + \frac{\epsilon}{6})}} \\
+    &< 2 \: e^{-\frac{m \epsilon^2}{6(n - 1)} }  \numberthis \label{elf_bernstein} 
+\end{align*}
+And similarly for $F_j$. Putting both of those cases together, we have by the union bound
+\begin{align*}
+  P(F_j \geq F_i) &= P\left(\left(F_j - \E[F_j] < \frac{m \epsilon/62}{2(n - 1)}\right) \cup \left(\E[F_i] - F_i < \frac{m \epsilon^2}{2(n - 1)} \right) \right) \\
+  &\leq P\left(F_j - \E[F_j] < \frac{m \epsilon^2}{2(n - 1)}\right) + P\left(\E[F_i] - F_i < \frac{m \epsilon^2}{2(n - 1)} \right) \\
+  &\leq 4 \: e^{-\frac{m \epsilon^2}{6(n - 1)} }
+\end{align*}
+Using the union bound over all $j$, we have
+\begin{align*}
+  P\left(M_l(y_1, ..., y_n, x) = i\right)
+  &= 1 - \sum_{j\neq i} P\left(M_l(y_1, ..., y_n, x) = j\right) \\
+  &\geq 1 - \sum_{j\neq i} P\left(F_j \geq F_i\right) \\
+  &\geq 1 - 4 (n-1) e^{-\frac{m \epsilon^2}{6(n - 1)}} 
+\end{align*}
+\hfill\QED
+
+Assigning this probability to $1 - \delta$, we can see that for a fixed $n, \epsilon$, ELF chooses the correct forecaster with probability at least $1 - \delta$ if
+\[m \geq \frac{6(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right) \]
+
+\section{SHELF}
+For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with probability $R_q(y_{i, k}, x_i)$, and 0 otherwise. Then, for each event $k$ we assign forecaster $i$ the score $f_{i, k} = X_{i, k}$ obtained by sampling this variable. Finally, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$, then chose the forecaster with the highest $F_i$, breaking ties uniformly at random. 
+
+\subsection{Truthfulness}
+(following section 4.2, theorem 4) For a single event with true probability $\theta$, every forecaster will either win 1 or 0 events. The probability that their final score is 1 will just be their expected score for the single event. Therefore, to maximize their final score, each forecaster must maximize their expected score for the single event. Their score is just $\E_{x \sim \theta}(R_q(y_i, x)) = \E_{x \sim \theta}(1 - (y_i - x)^2)$. This is maximized when $y_i = \theta$, so the mechanism is truthful. (what theorem 4 does) We can also see this directly be noting that $R_q$ is a strictly proper scoring rule, so its expectation is maximized when $y_i = \theta$. 
+
+\textbf{Theorem}: SHELF is truthful for $m \geq 1$ events.\\\\
+Proof. For each forecaster $j \in [1, n]$ fix forecaster's report.\\\\
+S'pose that for some forecaster $i$, $i$'s report on some number of events $k \in [1, m]$ does not maximize their expected score for any of those individual events.\\
+Let $k^\prime$ be one of those such events.\\\\
+We will now show that $i$ will maximize their probability of being chosen as the best forecaster in the SHELF mechanism iff they alter their $k$ reports to maximize their expected score on each $k$ events. A guiding intuition here would be as follows: The higher the expected score a forecaster has on a given event, the higher the probability that SHELF awards them a point on this specific event, and the only way to maximize one's probability of being selected as the best forecaster is to increase the number of points they are awarded. Therefore, for a single independent event, increasing one's expected score will either increase the probability of being selected as the best forecaster or leave it unchanged, and it does so without altering results of any other event due to the events' independence. In this way, we will show that being truthful for a singular event will always increase one's probability of being selected as the best forecaster. We can then repeat this process for each untruthful report to maximize the probability of being selected as the best forecaster.\\\\
+Formally, we will analyze three cases relating to the context provided by the results of $m - 1$ events other than $k^\prime$.\\\\
+Let $V(i)$ denote the number of points forecaster $i$ has accrued.\\
+Let $f_{i,k}(x)$ denote the probability forecaster $i$ scores a point on event $k$.\\
+
+\begin{enumerate}
+    \item Some forecaster $j$ scores at least two more points than $i$, OR $i$ scores at least two more points than any other forecaster.\\
+    $$\exists j \in [1,m] \text{ s.t. } j \ne i \text{ and } V(j) - V(i) \geq 2$$ 
+    $$OR$$
+    $$\forall j \in [1,m] \text{ s.t. } j \ne i; V(i) - V(j) \geq 2$$
+    For this case, $i$'s probability of being selected as the best forecaster is either exactly $1$ or $0$. It is also unaffected by $k^\prime$, because gaining, or failing to gain, $1$ point in this context is not enough to alter the outcome as only the forecaster with the most number of points is chosen as the best forecaster with ties broken uniformly.\\\\
+    
+    \item Some forecaster $j$ scores exactly one more point than $i$, AND no other forecasters score strictly more points than $i$.\\
+    $$\exists j \in [1,m] \text{ s.t. } j \neq i \text{ and } V(j) - V(i) = 1$$
+    $$AND$$
+    $$\forall l \in [1,m] \text{ s.t. } l \neq i \text{ and } l \neq j; V(i) - V(l) \geq 0$$
+    For this case, $i$ must seek to maximize $f_{i, k^\prime}(x)$ to have any non-zero probability of being selected as the best forecaster under the SHELF mechanism. Due to the fact that $f_{i, k^\prime}(x) = R_q(y_{i,k^\prime}, x)$ in the SHELF mechanism, $i$'s expectation in number of points is maximized when their respective score is maximized. As a result, $i$, attempting to maximize $f_{i, k^\prime}(x)$, will always prefer to report $p_{i,k^\prime}$ over any other report because that is where their expected score is maximized under the quadratic scoring rule. 
+    
+    \item No forecasters score more points than $i$, but there is at least one forecaster $j$ that scores the same number of points as $i$ or scores exactly one less point than $i$.
+    $$\exists j \in [1,m] \text{ s.t. } j \ne i \text{ and } V(i) - V(j) \in \{0,1\}$$
+    In any given configuration, a forecaster's probability of being selected as the best forecaster is maximized when the minimal number of other forecaster have as many points as them. In the SHELF mechanism, any forecaster's probability of scoring a point on a given event is independent of all others. Therefore, there is no action that can be taken to minimize the probability of any competitor's probability of being selected as the best forecaster except strictly increasing one's own point total. In this final case, the only way for $i$ to increase their probability of being chosen as the best forecaster would be to increase the probability of scoring a point in event $k^\prime$. The same logic as case 2 holds here that $i$ would then prefer to report $p_{i,k^\prime}$ and maximize their expected score in $k^\prime$ to increase their expected number of points which will increase their probability of being selected as the best forecaster.
+\end{enumerate}
+In case 1, $i$'s probability of being selected as the best forecaster is equivalent whether they report truthfully or not. In cases 2 and 3, $i$'s probability of being selected as the best forecaster is strictly greater than reporting anything else. As a result, we can see that under any maximization of our utility function, $i$ will always prefer to report their true belief. Since these three cases are exhaustive and our proposed utility function is increasing, we can now conclude that reporting one's true beliefs has state-wise dominance over reporting outside of one's true beliefs. State-wise dominance is a special case of first-order stochastic dominance. Therefore, reporting true beliefs has first-order stochastic dominance over reporting non-true beliefs. Thus, via lemma 1, SHELF must be truthful.
+
+\subsection{Accuracy}
+
+From proposition 2, we have that $E_{x \sim \theta}(R_q(y, x)) = R_q(y, \theta) + \theta^2 - \theta$. Additionally, for a single event, a forecaster's accuracy $a_i$ is by definition just $R_q(y, \theta)$. So, $E_{x \sim \theta}(R_q(y, x)) = a_i + \theta^2 - \theta$. For a single event with probability $\theta$, forecaster $i$'s expected score is $\E_{x \sim \theta} f_i = E_{x \sim \theta}(R_q(y_i, x)) = a_i + \theta^2 - \theta$.
+
+(section 4.3, proposition 5).  For forecaster $i$ to be selected, they either need to have $f_i = 1$, and then be chosen uniformly at random from all others who scored 1, or everyone must score 0 and they will be chosen uniformly at random. In the first case, the expected number of other forecasters who also score 1 is $\sum_{i' \neq i} \E_{x \sim \theta} f_{i'} = \sum_{i' \neq i} (a_{i'} + \theta^2 - \theta) = (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}$. Then, the probability that forecaster $i$ is chosen is 
+\[
+  P(f_i = 1) \frac{1}{1 + (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}} = \frac{a_i +\theta^2 - \theta}{1 + (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}}
+\]
+In the other case, the probability $i$ wins is just 
+\[
+  \frac{1}{n} \prod_{i} P(f_i = 0) = \frac{\prod_i (1 - a_i -\theta^2 + \theta)}{n}
+\]
+
+There's probably a better way to do this... Actually coming back to this I'm not even sure that the first step is allowed (using expected number of winners directly instead of summing over cases)
+
+multiple events: (section 5.3, theorem 8)
+Let $a_i \geq a_j + \epsilon$ for all $j\neq i$. Like in theorem 8, we first bound the expected number of events won that $i$ exceeds $j$ by. 
+\begin{align*}
+  \E \left( \sum_{k=1}^m f_{i, k}\right) - \E \left( \sum_{k=1}^m f_{j, k}\right)
+  &= \left( \sum_{k=1}^m \E f_{i, k}\right) - \left( \sum_{k=1}^m \E f_{j, k}\right)\\
+  &= \sum_{k=1}^m \left(\E (f_{i, k}) - \E (f_{j, k})\right)\\
+  &= \sum_{k=1}^m \left((a_i + \theta_k^2 - \theta_k) - (a_j + \theta_k^2 - \theta_k)\right)\\
+  &= \sum_{k=1}^m \left(a_i - a_j\right)\\
+  &\geq \sum_{k=1}^m \epsilon\\
+  &=m \epsilon
+\end{align*}
+If $F_j \geq F_i$, then either $\E(F_i) - F_i \geq \frac{m \epsilon}{2}$ or $F_j - \E(F_j) \geq \frac{m \epsilon}{2}$. By Hoeffding's, we can upper bound the probability of each of these events by $2 e^{-\frac{2 (\frac{m \epsilon}{2})^2}{m}} = 2 e^{\frac{- m \epsilon^2}{2}}$. Using the union bound, the probability that either of those events occurs is twice this, or $4 e^{\frac{- m \epsilon^2}{2}}$.
+
+Using the union bound again over all $j \neq i$, we have 
+\[
+1 - \delta = P(M(y_1, ..., y_n, x) = i) = 1 - \sum_{j \neq i} P(F_j \geq F_i) = 1 - 4 (n-1) e^{\frac{- m \epsilon^2}{2}}
+\]
+Letting this quantity be $1 - \delta$ and solving for $m$, we see that this mechanism correctly chooses forecaster $i$ with probability $1 - \delta$ when 
+\[ m \geq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta} \]
+
+
+% \begin{thebibliography}{99}
+
+% \end{thebibliography}
+
+\end{document}
