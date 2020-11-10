@@ -66,8 +66,11 @@ define selection mechanism
 define accuracy
 
 define proper scoring rule
+Let $p$ denote belief and $y$ denote report
+A scoring rule R is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$
 
 define truthful mechanism
+A scoring mechanism is truthful iff, for all forecasters, their respective probability of being selected as the best overall forecaster is maximized when their reports match their beliefs for all events. 
 
 define accuracy gap
 
@@ -155,32 +158,35 @@ For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with proba
 (following section 4.2, theorem 4) For a single event with true probability $\theta$, every forecaster will either win 1 or 0 events. The probability that their final score is 1 will just be their expected score for the single event. Therefore, to maximize their final score, each forecaster must maximize their expected score for the single event. Their score is just $\E_{x \sim \theta}(R_q(y_i, x)) = \E_{x \sim \theta}(1 - (y_i - x)^2)$. This is maximized when $y_i = \theta$, so the mechanism is truthful. (what theorem 4 does) We can also see this directly be noting that $R_q$ is a strictly proper scoring rule, so its expectation is maximized when $y_i = \theta$. 
 
 \textbf{Theorem}: SHELF is truthful for $m \geq 1$ events.\\\\
-Proof. For each forecaster $j \in [1, n]$ fix forecaster's report.\\\\
-S'pose that for some forecaster $i$, $i$'s report on some number of events $k \in [1, m]$ does not maximize their expected score for any of those individual events.\\
-Let $k^\prime$ be one of those such events.\\\\
-We will now show that $i$ will maximize their probability of being chosen as the best forecaster in the SHELF mechanism iff they alter their $k$ reports to maximize their expected score on each $k$ events. A guiding intuition here would be as follows: The higher the expected score a forecaster has on a given event, the higher the probability that SHELF awards them a point on this specific event, and the only way to maximize one's probability of being selected as the best forecaster is to increase the number of points they are awarded. Therefore, for a single independent event, increasing one's expected score will either increase the probability of being selected as the best forecaster or leave it unchanged, and it does so without altering results of any other event due to the events' independence. In this way, we will show that being truthful for a singular event will always increase one's probability of being selected as the best forecaster. We can then repeat this process for each untruthful report to maximize the probability of being selected as the best forecaster.\\\\
-Formally, we will analyze three cases relating to the context provided by the results of $m - 1$ events other than $k^\prime$.\\\\
+Proof. For each forecaster $j \in [1, n]$ fix forcaster's report.\\\\
+S'pose that for some forecaster $i$, $i$'s report on some subset of events, where $k \in [1, m]$ denotes the size of this subset, does not maximize their expected score for any of those individual events.\\
+Let $k^\prime$ be one of those events.\\\\
+We will now show that $i$ will maximize their probability of being chosen as the best forecaster in the SHELF mechanism iff they alter their $k$ reports to maximize their expected score on each $k$ events. A guiding intuition here would be as follows: The higher the expected score a forecaster has on a given event, the higher the probability that SHELF awards them a point on this specific event, and the only way to maximize one's probability of being selected as the best forecaster is to increase the number of points they are awarded. Therefore, for a single independent event, increasing one's expected score will either increase the probability of being selected as the best forecaster or leave it unchanged, and it does so without altering results of any other event. In this way, we will show that being truthful for a singular event will always increase one's probability of being selected as the best forecaster. We can then repeat this process for each untruthful report to maximize the probability of being selected as the best forecaster.\\\\
+Formally, we will analyze three cases relating to the context provided by the $m - 1$ events other than $k^\prime$.\\\\
 Let $V(i)$ denote the number of points forecaster $i$ has accrued.\\
-Let $f_{i,k}(x)$ denote the probability forecaster $i$ scores a point on event $k$.\\
+Let $f_{i,k}$ denote the probability forecaster $i$ scores a point on event $k$.\\
 
 \begin{enumerate}
     \item Some forecaster $j$ scores at least two more points than $i$, OR $i$ scores at least two more points than any other forecaster.\\
     $$\exists j \in [1,m] \text{ s.t. } j \ne i \text{ and } V(j) - V(i) \geq 2$$ 
     $$OR$$
     $$\forall j \in [1,m] \text{ s.t. } j \ne i; V(i) - V(j) \geq 2$$
-    For this case, $i$'s probability of being selected as the best forecaster is either exactly $1$ or $0$. It is also unaffected by $k^\prime$, because gaining, or failing to gain, $1$ point in this context is not enough to alter the outcome as only the forecaster with the most number of points is chosen as the best forecaster with ties broken uniformly.\\\\
+    For this case, $i$'s probability of being selected as the best forecaster is either $1$ or $0$. It is also unaffected by being truthful or not in $k^\prime$, because gaining, or failing to gain, $1$ point in this context is not enough to alter the outcome as only the forecaster with the most number of points is chosen as the best forecaster with ties broken uniformly.\\\\
     
     \item Some forecaster $j$ scores exactly one more point than $i$, AND no other forecasters score strictly more points than $i$.\\
     $$\exists j \in [1,m] \text{ s.t. } j \neq i \text{ and } V(j) - V(i) = 1$$
     $$AND$$
     $$\forall l \in [1,m] \text{ s.t. } l \neq i \text{ and } l \neq j; V(i) - V(l) \geq 0$$
-    For this case, $i$ must seek to maximize $f_{i, k^\prime}(x)$ to have any non-zero probability of being selected as the best forecaster under the SHELF mechanism. Due to the fact that $f_{i, k^\prime}(x) = R_q(y_{i,k^\prime}, x)$ in the SHELF mechanism, $i$'s expectation in number of points is maximized when their respective score is maximized. As a result, $i$, attempting to maximize $f_{i, k^\prime}(x)$, will always prefer to report $p_{i,k^\prime}$ over any other report because that is where their expected score is maximized under the quadratic scoring rule. 
+    For this case, $i$ must seek to maximize $f_{i,k^\prime}$ to have any non-zero probability of being selected as the best forecaster under the SHELF mechanism. 
+    In the SHELF mechanism, the maximum payout a forecaster can receive for a single event is $1$, and that point is awarded to them with probability exactly equal to their quadratic score. Thus, we know a forecaster's expected value for a singular event is exactly their quadratic score. Since the quadratic scoring rule is proper, we know that the expectation of a forecaster's quadratic score is maximized when the forecaster is reporting their true beliefs. As a result, we can conclude that the only way for $i$ to maximize their probability of receiving a point in $k^\prime$ is to report their true beliefs. By reporting their true beliefs, which maximizes the probability that they score another point, $i$ also maximizes the probability of being selected as the best forecaster which, in this context, occurs when only $i$ scores a point and the tie between $j$ and $i$ is broken uniformly via the rules of SHELF.
     
-    \item No forecasters score more points than $i$, but there is at least one forecaster $j$ that scores the same number of points as $i$ or scores exactly one less point than $i$.
+    \item No forecasters score more points than $i$, but there is at least one forecaster $j$ that scores the same number of points as $i$ or scores exactly one less point than $y_i$.
     $$\exists j \in [1,m] \text{ s.t. } j \ne i \text{ and } V(i) - V(j) \in \{0,1\}$$
-    In any given configuration, a forecaster's probability of being selected as the best forecaster is maximized when the minimal number of other forecaster have as many points as them. In the SHELF mechanism, any forecaster's probability of scoring a point on a given event is independent of all others. Therefore, there is no action that can be taken to minimize the probability of any competitor's probability of being selected as the best forecaster except strictly increasing one's own point total. In this final case, the only way for $i$ to increase their probability of being chosen as the best forecaster would be to increase the probability of scoring a point in event $k^\prime$. The same logic as case 2 holds here that $i$ would then prefer to report $p_{i,k^\prime}$ and maximize their expected score in $k^\prime$ to increase their expected number of points which will increase their probability of being selected as the best forecaster.
+    In any given configuration, a forecaster's probability of being selected as the best forecaster is maximized when the minimal number of other forecaster have as many points as them. In the SHELF mechanism, any forecaster's probability of scoring a point on a given event is independent of all other. Therefore, there is no action that can be taken to minimize the probability of any competitor's probability of being selected as the best forecaster except strictly increasing one's own point total. In this final case, the only way for $i$ to increase their probability of being chosen as the best forecaster would be to increase the probability of scoring a point in $k^\prime$. The same logic as case 2 holds here that $i$ would then prefer to be truthful and maximize their expected score in $k^\prime$ to increase their probability of being selected as the best forecaster.
 \end{enumerate}
-In case 1, $i$'s probability of being selected as the best forecaster is equivalent whether they report truthfully or not. In cases 2 and 3, $i$'s probability of being selected as the best forecaster is strictly greater than reporting anything else. As a result, we can see that under any maximization of our utility function, $i$ will always prefer to report their true belief. Since these three cases are exhaustive and our proposed utility function is increasing, we can now conclude that reporting one's true beliefs has state-wise dominance over reporting outside of one's true beliefs. State-wise dominance is a special case of first-order stochastic dominance. Therefore, reporting true beliefs has first-order stochastic dominance over reporting non-true beliefs. Thus, via lemma 1, SHELF must be truthful.
+
+Since any configuration of the $m-1$ events falls into one of these three cases, we have shown that any forecaster is weakly incentivized to report truthfully.
+To show that any forecaster is strongly incentivized to report truthfully, we simply show that $i$ believes cases 2 or 3 will happen with positive probability. Since $y_{j,k} = p_{j,k} \in (0,1) \forall j \forall k$, we know that every forecaster has some uncertainty on each event. As a result, we can conclude that $f_{j,k} > 0 \forall j \forall k$. We can think of all possible outcomes as the set of all possible binary strings of length $n$, and since $f_{j,k} > 0 \forall j \forall k$ there exists at least one sequence of outcomes strings picked from our set that constitutes cases 2 or 3. As a result, there is a positive probability that cases 2 or 3 occur, and thus forecasters are strongly incentivized to report truthfully.  
 
 \subsection{Accuracy}
 
