@@ -74,6 +74,8 @@ A scoring mechanism is truthful iff, for all forecasters, their respective proba
 
 define accuracy gap
 
+define $m_\delta$
+
 \subsection{Truthfulness using FSD}
 Let $p_i$ represent the set of true beliefs $i$ holds over all $m$ events\\\\
 Let $y_{i}^{t}$ denote the set of $i$'s reports s.t. for every $k; y_{i,k}^{t} = p_{i,k}$\\\\
@@ -105,9 +107,9 @@ The ELF mechanism, introduced in/by [cite elf paper], improves upon the Naive me
 \[ f_{i, k} = \frac{1}{n} + \frac{1}{n} \left(R_q(y_{i, k}, x_k) - \frac{\sum_{j\neq i} R_q(y_{j, k}, x_k)}{n-1} \right)\]
 This score is the additively normalized quadratic score among all forecasters. A forecaster increasing their own quadratic score increases the chances they win an event, while decreasing the chances others win that event. Let $w_k$ be the winner of event $k$. The ELF mechanism, $M_l$, then chooses $\argmax_i \sum_{k=1}^m \1(w_k = i)$ as the winner of the competition. Essentially, we give the winner of each event a point, and then pick the forecaster who got the most points.
 
-In [elf paper] Theorem 6, they show that ELF is strictly truthful. In Theorem 8, they also show it is accurate. Specifically, that for an accuracy gap of $\epsilon$, that ELF chooses the most accurate forecaster with probability $ \geq 1 - \delta$ if
-\[ m \geq \frac{2(n-1)^2}{\epsilon^2} \ln \left(\frac{4(n-1)}{\delta}\right)\]
-For a fixed forecaster accuracy gap and mechanism accuracy, the number of events ELF needs is proportional to $n^2 \ln n$. However, this lower bound is not tight, and can be improved. 
+In [elf paper] Theorem 6, they show that ELF is strictly truthful. In Theorem 8, they also show it is accurate. Specifically, that for an accuracy gap of $\epsilon$, ELF has
+\[ m_\delta \leq \frac{2(n-1)^2}{\epsilon^2} \ln \left(\frac{4(n-1)}{\delta}\right)\]
+For a fixed forecaster accuracy gap and desired mechanism accuracy, the number of events ELF needs is proportional to $n^2 \ln n$. However, this upper bound is not tight, and can be lowered significantly. 
 
 Let $F_{i, k}$ be the indicator function for forecaster $i$ winning event $k$. Then, $F_i = \sum_k F_{i, k}$ is the random variable that is the number of events forecaster $i$ wins. The proof of [elf paper] Theorem 8 utilized the Hoeffding bound applied to $F_i$, which assumes they have high variance. However, this is not the case, which leads to an improvement in the lower bound. 
 \begin{theorem}[Bernstein's Inequality]
@@ -117,7 +119,7 @@ Let $F_{i, k}$ be the indicator function for forecaster $i$ winning event $k$. T
 \end{theorem}
 \begin{theorem}
   \label{elf_bound}
-  For an accuracy gap $\epsilon$, ELF correctly chooses the most accurate forecaster with probability at least $1 - 4 (n-1) e^{-\frac{m \epsilon}{6(n - 1)}}$.
+    For an accuracy gap $\epsilon$, ELF correctly chooses the most accurate forecaster with probability at least $1 - 4 (n-1) e^{-\frac{m \epsilon}{6(n - 1)}}$.
 \end{theorem}
 \emph{Proof:} Note that for any single event $k$, every forecaster wins with probability at best $\frac{2}{n}$, and at worst $\frac{1}{n} - \frac{1}{n(n-1)}$ (achieved when $y_i = 1$, $y_{j\neq i} = 0$, and $x_i = 1$). Since $F_{i, k}$ is just a binary random variable, it will have highest variance when it's expectation is as close to $\frac{1}{2}$ as possible. For nontrivially small $n$, this will mean its expectation is $\frac{2}{n}$ (or equivalently $P(F_{i, k} = 1) = \frac{2}{n}$), so its variance will be at most $\frac{2(n-2)}{n^2}$. So we have $\Var(F_{i, k}) \leq \frac{2(n-2)}{n^2} < \frac{2}{n}$. 
 
@@ -131,25 +133,25 @@ Applying Theorem \ref{bernstein}, we have
     &< 2 \: e^{\frac{-\left(\frac{m \epsilon}{2(n - 1)}\right)^2 }{2\left(\frac{2m}{n} + \frac{m \epsilon}{6(n - 1)}\right)}} \\
     &< 2 \: e^{\frac{-\left(\frac{m \epsilon}{2(n - 1)}\right)^2 }{2\left(\frac{m}{n-1}(2 + \frac{\epsilon}{6}) \right)}} \\
     &= 2 \: e^{\frac{-\frac{m \epsilon^2}{2(n - 1)} }{(2 + \frac{\epsilon}{6})}} \\
-    &< 2 \: e^{-\frac{m \epsilon^2}{6(n - 1)} }  \numberthis \label{elf_bernstein} 
+    &< 2 \: e^{-\frac{m \epsilon^2}{5(n - 1)} }  \numberthis \label{elf_bernstein} 
 \end{align*}
 And similarly for $F_j$. Putting both of those cases together, we have by the union bound
 \begin{align*}
-  P(F_j \geq F_i) &= P\left(\left(F_j - \E[F_j] < \frac{m \epsilon/62}{2(n - 1)}\right) \cup \left(\E[F_i] - F_i < \frac{m \epsilon^2}{2(n - 1)} \right) \right) \\
+  P(F_j \geq F_i) &= P\left(\left(F_j - \E[F_j] < \frac{m \epsilon^2}{2(n - 1)}\right) \cup \left(\E[F_i] - F_i < \frac{m \epsilon^2}{2(n - 1)} \right) \right) \\
   &\leq P\left(F_j - \E[F_j] < \frac{m \epsilon^2}{2(n - 1)}\right) + P\left(\E[F_i] - F_i < \frac{m \epsilon^2}{2(n - 1)} \right) \\
-  &\leq 4 \: e^{-\frac{m \epsilon^2}{6(n - 1)} }
+  &\leq 4 \: e^{-\frac{m \epsilon^2}{5(n - 1)} }
 \end{align*}
 Using the union bound over all $j$, we have
 \begin{align*}
   P\left(M_l(y_1, ..., y_n, x) = i\right)
   &= 1 - \sum_{j\neq i} P\left(M_l(y_1, ..., y_n, x) = j\right) \\
   &\geq 1 - \sum_{j\neq i} P\left(F_j \geq F_i\right) \\
-  &\geq 1 - 4 (n-1) e^{-\frac{m \epsilon^2}{6(n - 1)}} 
+  &\geq 1 - 4 (n-1) e^{-\frac{m \epsilon^2}{5(n - 1)}} 
 \end{align*}
 \hfill\QED
 
-Assigning this probability to $1 - \delta$, we can see that for a fixed $n, \epsilon$, ELF chooses the correct forecaster with probability at least $1 - \delta$ if
-\[m \geq \frac{6(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right) \]
+Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon$, ELF will choose the correct forecaster with probability at least $1 - \delta$ if $m$ is large enough for the above inequality to hold. Solving it for $m$, we get the minimum such satisfying value
+\[m_\delta \leq \frac{5(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right) \]
 
 \section{SHELF}
 For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with probability $R_q(y_{i, k}, x_i)$, and 0 otherwise. Then, for each event $k$ we assign forecaster $i$ the score $f_{i, k} = X_{i, k}$ obtained by sampling this variable. Finally, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$, then chose the forecaster with the highest $F_i$, breaking ties uniformly at random. 
@@ -192,6 +194,7 @@ To show that any forecaster is strongly incentivized to report truthfully, we si
 
 From proposition 2, we have that $E_{x \sim \theta}(R_q(y, x)) = R_q(y, \theta) + \theta^2 - \theta$. Additionally, for a single event, a forecaster's accuracy $a_i$ is by definition just $R_q(y, \theta)$. So, $E_{x \sim \theta}(R_q(y, x)) = a_i + \theta^2 - \theta$. For a single event with probability $\theta$, forecaster $i$'s expected score is $\E_{x \sim \theta} f_i = E_{x \sim \theta}(R_q(y_i, x)) = a_i + \theta^2 - \theta$.
 
+\subsection{Truthfulness for a single event}
 (section 4.3, proposition 5).  For forecaster $i$ to be selected, they either need to have $f_i = 1$, and then be chosen uniformly at random from all others who scored 1, or everyone must score 0 and they will be chosen uniformly at random. In the first case, the expected number of other forecasters who also score 1 is $\sum_{i' \neq i} \E_{x \sim \theta} f_{i'} = \sum_{i' \neq i} (a_{i'} + \theta^2 - \theta) = (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}$. Then, the probability that forecaster $i$ is chosen is 
 \[
   P(f_i = 1) \frac{1}{1 + (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}} = \frac{a_i +\theta^2 - \theta}{1 + (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}}
@@ -203,6 +206,7 @@ In the other case, the probability $i$ wins is just
 
 There's probably a better way to do this... Actually coming back to this I'm not even sure that the first step is allowed (using expected number of winners directly instead of summing over cases)
 
+\subsection{Truthfulness for multiple events}
 multiple events: (section 5.3, theorem 8)
 Let $a_i \geq a_j + \epsilon$ for all $j\neq i$. Like in theorem 8, we first bound the expected number of events won that $i$ exceeds $j$ by. 
 \begin{align*}
@@ -220,8 +224,8 @@ Using the union bound again over all $j \neq i$, we have
 \[
 1 - \delta = P(M(y_1, ..., y_n, x) = i) = 1 - \sum_{j \neq i} P(F_j \geq F_i) = 1 - 4 (n-1) e^{\frac{- m \epsilon^2}{2}}
 \]
-Letting this quantity be $1 - \delta$ and solving for $m$, we see that this mechanism correctly chooses forecaster $i$ with probability $1 - \delta$ when 
-\[ m \geq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta} \]
+Letting this quantity be $1 - \delta$ and solving for $m$, we see that this mechanism correctly chooses forecaster $i$ with probability $1 - \delta$ when $m$ is large enough to satisfy the inequality. Solving for $m$ gives us the minimum such value, which is an upper bound of $m_\delta$ for SHELF.
+\[ m_\delta \leq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta} \]
 
 
 % \begin{thebibliography}{99}
