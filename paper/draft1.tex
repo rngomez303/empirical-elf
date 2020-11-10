@@ -76,18 +76,6 @@ define accuracy gap
 
 define $m_\delta$
 
-\subsection{Truthfulness using FSD}
-Let $p_i$ represent the set of true beliefs $i$ holds over all $m$ events\\\\
-Let $y_{i}^{t}$ denote the set of $i$'s reports s.t. for every $k; y_{i,k}^{t} = p_{i,k}$\\\\
-Let $y_{i}^{\overline{t}}$ denote the set of $i$'s reports s.t. for every $k; y_{i,k}^{\overline{t}} \ne p_{i,k}$\\\\
-Let $G$ denote the cumulative distribution function over a lottery where $y_i = y_{i}^{t}$ and $H$ denote the cumulative distribution function over a lottery where $y_i = y_{i}^{\overline{t}}$\\\\
-Lemma 1: A scoring mechanism is truthful iff 
-$$\forall x; G(x) \le H(x)$$
-$$\exists x; G(x) < H(x)$$ 
-which is to say $G$ has first order stochastic dominance over $H$.\\\\
-This qualifies as a valid definition for a truthful mechanism because, if $G$ stochastically dominates $H$, then for every possible outcome, given some increasing utility function $U$, any given maximization of $U$ prefers the reports $y_{i}^{t}$ over the reports $y_{i}^{\overline{t}}$. This is to say that truthful reports are always preferred over non-truthful reports which constitutes truthfulness.\\\\\\
-SHELF Truthfulness\\\\
-
 \section{Simple average mechanism}
 The simplest selection mechanism (and what is often done in practice), we call the simple average mechanism. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $\argmax_i F_i$. Each forecaster's cumulative score in this mechanism $\sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_j = \sum_{i=1}^m 1 - (y_{i, j} - \theta_j)^2$. However, we will show that this approximation can be flawed.
 
