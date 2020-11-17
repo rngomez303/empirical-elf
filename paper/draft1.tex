@@ -167,6 +167,40 @@ Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon
 \[m_\delta \leq \frac{5(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right) \]
 \hfill\QED
 
+\begin{theorem}
+  \label{elf_lower_bound}
+    For $\delta < \frac{1}{2}$, $m_\delta(\elf, n, \epsilon) > n \log n$
+\end{theorem}
+\emph{Proof:} Pick some $\delta < \frac{1}{2}$ and consider the case where $m = n \log n$ and $\theta_k = 1$ for every event. Let $y_{1, k} = 1$ and $y_{i, k} = 0$ for every $i > 1$. Therefore, forecaster 1 always forecasts correctly and has a quadratic score $R_q(1, 1) = 1$ for each event, while everyone else is wrong and has a quadratic score of $R_q(0, 1) = 0$ for each event. Then, $a_1 = 1$, and $a_i = 0$ for $i > 1$, so we have the worst possible accuracy gap $\epsilon = 1$.
+
+For every event, forecaster 1's score will be 
+\begin{align*}
+  f_1 &= \frac{1}{n}\left(1 + R_q(y_1, 1) - \frac{1}{n-1} \sum_{j \neq i} R_q(y_j, x) \right) \\
+      &= \frac{1}{n}\left(1 + 1 - \frac{1}{n-1} \sum_{j \neq i} 0 \right)\\
+      &= \frac{2}{n}
+\end{align*}
+Since all the other forecasters are symmetric, their $f_i$ must all be the same, and since they sum to 1, we must have $f_i = \frac{n-2}{n(n-1)} < \frac{1}{n}$. 
+
+We can reframe the way winners are chosen for each event. Instead of holding a lottery, we first flip a coin that gives forecaster 1 a win with probability $\frac{2}{n}$. If it does not give them the win, we run a normal lottery for the remaining forecasters, where they each have probability $\frac{1}{n-1}$ of winning. This gives them an overall probability of $\frac{n-2}{n(n-1)}$ to win each event, so it is the same the original lottery. 
+
+Since all the events are uniform, the expected number of lotteries forecaster 1 will win is $m f_1 = \frac{2m}{n} = 2 \log n$. Specifically, their wins will follow the Bernoulli distribution $B(n, \frac{2}{n})$. With some probability $C_1 = P(B(n, \frac{2}{n}) < 2\log n) \approx \frac{1}{2}$, forecaster 1 will win less events than expected. 
+
+The distribution of wins for the remaining forecasters will follow a uniform multinomial distribution. Specifically, we can model it with Balls and Bins. Let $M$ be the maximum number of wins of any of the remaining forecasters. 
+\begin{lemma}
+    $P(M > 2 \log n) = 1 - o(1)$.
+\end{lemma}
+\emph{Proof:}
+From Theorem 1 of \cite{bnb}, we know that for $m = n \log n$, $P(M > k_\alpha) = 1 - o(1) > C_2$ for some constant $C_2$, where $c = \frac{m}{n\log n}$, $k_\alpha = (d_c - 1 + \alpha) \log n$, and $0 < 1 < \alpha$, such that $d_c$ is the larger solution of $1 + x(\log c - \log x + 1) - c= 0$.
+
+In our case, $c = 1$, so $d_c$ is the solution to $x (1 - \log x) = 0$. Therefore, $d_c = e$. Since this inequality holds for any $\alpha$, we let $\alpha = 3 - e$. Plugging in both values gives us $k_\alpha = 2 \log n$, so $P(M > 2 \log n) = 1 - o(1)$. \hfill \QED
+
+Using the lemma, for any $C_2 < 1$ and sufficiently large $n$, $P(M > 2 \log n) > C_2$. We choose some $C_2 > 2\delta$. Now, the probability that forecaster 1 is not chosen is at least
+\[
+  P(B(n, \frac{2}{n}) < 2\log n) \times P(M > 2 \log n) > \frac{1}{2} \times 2\delta = \delta
+\]
+Therefore, it is not true that for any $n$, $\epsilon$, $P(\elf(y, x) \neq i^*) \leq \delta$ when $m = n \log n$. Therefore, $m_\delta(\elf, n, \epsilon) > n \log n$. 
+\hfill \QED
+
 \section{SHELF}
 \newcommand{\shelf}{M_{\mathrm{SHELF}}}
 
@@ -264,6 +298,8 @@ Comparing this to the result of Theorem \ref{elf_bound}, we see that $\shelf$ is
 
 \begin{thebibliography}{99}
 \bibitem{elf} Witkowski, Freeman  \emph{Incentive-Compatible Forecasting Competitions} \url{https://las.inf.ethz.ch/files/witkowski-etal-aaai2018.pdf}.
+
+\bibitem{bnb} Raab, Steger  \emph{“Balls into Bins” — A Simple and Tight Analysis} \url{http://www.dblab.ntua.gr/~gtsat/collection/scheduling/Balls%20into%20Bins%20A%20Simple%20and%20Tight%20Anal.pdf}.
 
 \end{thebibliography}
 
