@@ -93,7 +93,7 @@ $\epsilon = a^* - \max_{i \neq i^*} a_i$ denote the accuracy gap.\\
 
 For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster.\\
 
-Similar to work in [ELF Citation], we will focus on using the \textbf{proper scoring rule}, the \textbf{quadratic scoring rule} in our forecaster selection mechanism.\\
+Similar to work in \cite{elf}, we will focus on using the \textbf{proper scoring rule}, the \textbf{quadratic scoring rule} in our forecaster selection mechanism.\\
 
 \textbf{Definition 5: Proper Scoring Rule}:\\
 Scoring rule, $R$ is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$\\
@@ -173,7 +173,7 @@ Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon
 For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with probability $R_q(y_{i, k}, x_i)$, and 0 otherwise. Then, for each event $k$ we assign forecaster $i$ the score $f_{i, k} = X_{i, k}$ obtained by sampling this variable. Finally, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$, then chose the forecaster with the highest score $\shelf(y, x) = \argmax_i F_i$, breaking ties uniformly at random. 
 
 \subsection{Truthfulness}
-Note: The following analysis is inspired by and follows the work done in [ELF Citation].\\\\
+Note: The following analysis is inspired by and follows the work done in \cite{elf}.\\\\
 For a single event with true probability $\theta$, every forecaster will either win 1 or 0 events. The probability that their final score is 1 will just be their expected score for the single event. Therefore, to maximize their final score, each forecaster must maximize their expected score for the single event. Their score is just $\E_{x \sim \theta}(R_q(y_i, x)) = \E_{x \sim \theta}(1 - (y_i - x)^2)$. This is maximized when $y_i = \theta$, so the mechanism is truthful. (what theorem 4 does) We can also see this directly be noting that $R_q$ is a strictly proper scoring rule, so its expectation is maximized when $y_i = \theta$. 
 
 \begin{theorem}
