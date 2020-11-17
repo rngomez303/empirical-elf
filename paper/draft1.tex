@@ -67,47 +67,58 @@ keywords: event, forecast, voting
 EFV
 
 \section{Model and Definitions}
-Our model will consist of $n$ forecasters s.t. $n \ge 2$ where $i \in [1,n]$ denotes the $i$th forecaster, $m$ independent events where $k \in [1,m]$ denotes the $k$th event. Each event $k \in [1,m]$ will be associated with a random variable $X_k$. $X_k = 1$ will denote that event $k$ occurred, and, likewise, $X_k = 0$ will denote event $k$ did not occur. $\forall k \in [m] \exists \theta_k$ s.t. $\theta_k$ denotes the true, unknown probability of event $k$ occurring;  $\theta_k = P(X_k = 1) = 1 - P(X_k = 0)$. We will denote each outcome drawn as $x_i \sim X_i$. For each forecaster $i$, we denote their true belief that event $k$ will occur as $\hat{\theta}_{i,k} \in (0,1)$. We then denote $y_{i,k} \in [0,1]$ as the actual report forecaster $i$ makes for event $k$. Note that $y_{i,k}$ need not equal $\hat{\theta}_{i,k}$. \\
+Our model will consist of $n$ forecasters s.t. $n \ge 2$ where $i \in [1,n]$ denotes the $i$th forecaster, $m$ independent events where $k \in [1,m]$ denotes the $k$th event. Each event $k \in [1,m]$ will be associated with a random variable $X_k$. $X_k = 1$ will denote that event $k$ occurred, and, likewise, $X_k = 0$ will denote event $k$ did not occur. $\forall k \in [m] \exists \theta_k$ s.t. $\theta_k$ denotes the true, unknown probability of event $k$ occurring;  $\theta_k = P(X_k = 1) = 1 - P(X_k = 0)$. We will denote each outcome drawn as $x_i \sim X_i$. For each forecaster $i$, we denote their true belief that event $k$ will occur as $\hat{\theta}_{i,k} \in (0,1)$. We then denote $y_{i,k} \in [0,1]$ as the actual report forecaster $i$ makes for event $k$. Note that $y_{i,k}$ need not equal $\hat{\theta}_{i,k}$. 
 
-After every event $k \in [1,m]$ has occurred, and thus each forecaster has reported $y_{i,k} \forall i f\forall k$, a mechanism will select exactly one forecaster from the set of $[n]$ as the 'best forecaster'.\\
+After every event $k \in [1,m]$ has occurred, and thus each forecaster has reported $y_{i,k} \forall i f\forall k$, a mechanism will select exactly one forecaster from the set of $[n]$ as the 'best forecaster'.
 
-\textbf{Definition 1: Forecaster Selection Mechanism:}\\
-Some mechanism $M(y, x)$ that maps the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_k)$ to an index $w \in [1, n]$. We say that forecaster $w$ wins the competition if $M(y, x) = w$.\\
+\begin{definition}
+  \label{mechanism}
+  A \textbf{selection mechanism} $M(y, x)$ is a map from the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_m)$ to an index $w \in [1, n]$.
+\end{definition}
+We say that forecaster $w$ wins the competition if $M(y, x) = w$. We call a forecaster selection mechanism truthful iff, for all forecasters, their probability of winning is maximized when they reports their beliefs as their forecasts.
 
-We call a forecaster selection mechanism truthful iff, for all forecasters, their probability of winning is maximized when they reports their beliefs as their forecasts.\\
-
-\textbf{Definition 2: Truthful:}\\
-$M$ is truthful iff $\forall i \in [n]$, $\forall \hat{\theta}_i$, $\forall y^{\prime}_i \neq \hat{\theta}_i$, and $\forall y_j s.t. j \neq i$,
+\begin{definition}
+  \label{truthfullness}
+  $M$ is \textbf{truthful} iff $\forall i \in [n]$, $\forall \hat{\theta}_i$, $\forall y^{\prime}_i \neq \hat{\theta}_i$, and $\forall y_j s.t. j \neq i$,
 \[ P(M( (y_1, ..., \hat \theta_i, .., y_n), x ) = i) \geq  P(M( (y_1, ..., \hat y_i, .., y_n), x ) = i)\]
-\textbf{Note:} $M$ is strictly truthful if the strict inequality inequality holds.\\
+$M$ is \textbf{strictly truthful} if the strict inequality inequality holds.
+\end{definition}
 
-Additionally, we would like our mechanism to choose the forecaster with the best predictions. We define the accuracy of a single forecaster $i$ as 1 minus the average squared loss of their forecasts compared to the true probabilities.\\
+Additionally, we would like our mechanism to choose the forecaster with the best predictions. We define the accuracy of a single forecaster $i$ as 1 minus the average squared loss of their forecasts compared to the true probabilities.
 
-\textbf{Definition 3: Accuracy:}\\
-$a_i = 1 - \frac{1}{m}\sum_{k=1}^m (y_{i, k} - \theta_k)^2$.\\
+\begin{definition}
+  \label{accuracy}
+  A forecaster's \textbf{accuracy} is $a_i = 1 - \frac{1}{m}\sum_{k=1}^m (y_{i, k} - \theta_k)^2$.
+\end{definition}
+An ideal mechanism would choose forecasters with larger accuracies with higher probabilities. Let $i^* = \argmax_i a_i$ be the highest accuracy forecaster, and let $a^* = a_{i^*}$.
 
-An ideal mechanism would choose forecasters with larger accuracies with higher probabilities. Let $i^* = \argmax_i a_i$ be the highest accuracy forecaster, and let $a^* = a_{i^*}$.\\
+\begin{definition}
+  \label{accuracy_gap}
+  The \textbf{accuracy gap} $\epsilon = a^* - \max_{i \neq i^*} a_i$ is the difference in accuracy of the first and second best forecasters.
+\end{definition}
 
-\textbf{Definition 4: Accuracy Gap:}\\
-$\epsilon = a^* - \max_{i \neq i^*} a_i$ denote the accuracy gap.\\
+% For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. 
+Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster.
 
-For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster.\\
+Similar to work in \cite{elf}, we will focus on using the proper scoring rule, the quadratic scoring rule in our forecaster selection mechanism.
 
-Similar to work in \cite{elf}, we will focus on using the \textbf{proper scoring rule}, the \textbf{quadratic scoring rule} in our forecaster selection mechanism.\\
+\begin{definition}
+  \label{scoring_rule}
+  A \textbf{scoring rule}, $R$ is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$
+\end{definition}
 
-\textbf{Definition 5: Proper Scoring Rule}:\\
-Scoring rule, $R$ is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$\\
-
-\textbf{Definition 6: Quadratic Scoring Rule}:\\
-$R_q = 1 - (y - x)^2$; Where $x$ denotes the observed outcome, and $y$ denotes the report.
+\begin{definition}
+  \label{quadratic_scoring_rule}
+  The \textbf{quadratic scoring rule}, is $R_q = 1 - (y - x)^2$, where $x$ denotes the observed outcome, and $y$ denotes the report.
+\end{definition}
 
 \section{Simple average mechanism}
 A simple selection mechanism that is often done in practice, we will call the simple average mechanism $M_s$. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $M_s(y, x) = \argmax_i F_i$. The idea of this mechanism is that each forecaster's final score in this mechanism is $F_i = \sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_i = \sum_{k=1}^m 1 - (y_{i, k} - \theta_k)^2$. Therefore, the forecaster with the highest score will correlate to the forecaster with the highest accuracy. However, we will show that this is not necessarily the case. 
 
 \subsection{Truthfulness}
-show simple counterexample(s?) \\
-- single event favors extremes \\
-- multiple events can be dominated by single untruthful event when rest are isomorphic \\
+This mechanism is not truthful, as we can see with a few counterexamples. First, consider the case of a single event with $\theta = 0.9$, with $n = 2$. If both forecasters correctly report $0.9$, they will each with with probability $\frac{1}{2}$. However, if either of them deviates and reports some $y > 0.9$, they will win whenever $x = 1$. This happens with probability 0.9, so it increases their probability of winning. Therefore, this is an advantageous misreport, so $M_s$ is not truthful. 
+
+This extends to multiple events as well. If event 1 is the event given above, and for every subsequent event both forecasters report the same $y$, their overall score will be the same for all events but the first one, so that will determine the winner. Therefore, the untruthful forecaster will still have an advantage, so $M_s$ is not truthful for multiple events either. 
 
 \subsection{Accuracy}
 Even though $M_s$ is not truthful, we assume that forecasters still report their true beliefs $\hat \theta_i$. For a single event, the most extreme forecasters will always get selected. For example, if the single outcome is $x = 0$, the forecaster with the minimum $\hat \theta_i $ will have the highest score, so they will always win. Similarly if $x = 1$, the highest belief forecaster will always win. 
@@ -128,11 +139,11 @@ Let $F_{i, k}$ be the indicator function for forecaster $i$ winning the lottery 
 \begin{theorem}[Bernstein's Inequality]
   \label{bernstein}
   Given random variables $X_i$ for $1 \leq i \leq n$ such that $0 \leq X_i \leq 1$ almost surely, let $S = \sum_i X_i$. Then,
-  \[ P\left(|S - \E[S]| < t\right) < 2 \: e^{\frac{-t^2 }{2\left(\Var(S) + \frac{t}{3}\right)} } \]
+  \[ P\left(|S - \E[S]| < t\right) < 2 \: e^{\frac{-t^2 }{2\left(\Var(S) + \frac{t}{3}\right)} } ~.\]
 \end{theorem}
 \begin{theorem}
   \label{elf_bound}
-    $m_\delta(\elf, n, \epsilon) \leq \frac{5(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right)$
+    $m_\delta(\elf, n, \epsilon) \leq \frac{5(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right)$ ~.
     % For an accuracy gap $\epsilon$, ELF correctly chooses the most accurate forecaster with probability at least $1 - 4 (n-1) e^{-\frac{m \epsilon}{6(n - 1)}}$.
 \end{theorem}
 \emph{Proof:} Note that for any single event $k$, every forecaster wins with probability at best $\frac{2}{n}$, and at worst $\frac{1}{n} - \frac{1}{n(n-1)}$ (achieved when $y_i = 1$, $y_{j\neq i} = 0$, and $x_i = 1$). Since $F_{i, k}$ is just a binary random variable, it will have highest variance when it's expectation is as close to $\frac{1}{2}$ as possible. For nontrivially small $n$, this will mean its expectation is $\frac{2}{n}$ (or equivalently $P(F_{i, k} = 1) = \frac{2}{n}$), so its variance will be at most $\frac{2(n-2)}{n^2}$. So we have $\Var(F_{i, k}) \leq \frac{2(n-2)}{n^2} < \frac{2}{n}$. 
@@ -169,7 +180,7 @@ Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon
 
 \begin{theorem}
   \label{elf_lower_bound}
-    For $\delta < \frac{1}{2}$, $m_\delta(\elf, n, \epsilon) > n \log n$
+    For $\delta < \frac{1}{2}$, $m_\delta(\elf, n, \epsilon) > n \log n$.
 \end{theorem}
 \emph{Proof:} Pick some $\delta < \frac{1}{2}$ and consider the case where $m = n \log n$ and $\theta_k = 1$ for every event. Let $y_{1, k} = 1$ and $y_{i, k} = 0$ for every $i > 1$. Therefore, forecaster 1 always forecasts correctly and has a quadratic score $R_q(1, 1) = 1$ for each event, while everyone else is wrong and has a quadratic score of $R_q(0, 1) = 0$ for each event. Then, $a_1 = 1$, and $a_i = 0$ for $i > 1$, so we have the worst possible accuracy gap $\epsilon = 1$.
 
@@ -214,7 +225,7 @@ For a single event with true probability $\theta$, every forecaster will either 
   \label{shelf_truthful}
     $\shelf$ is truthful for $m \geq 1$ events.
 \end{theorem}
-\emph{Proof:} For each forecaster $j \in [1, n]$ fix forcaster's report.
+\emph{Proof:} For each forecaster $j \in [1, n]$ fix forecaster's report.
 
 S'pose that for some forecaster $i$, $i$'s report on some subset of events, where $k \in [1, m]$ denotes the size of this subset, does not maximize their expected score for any of those individual events.\\
 Let $k^\prime$ be one of those events.
@@ -266,7 +277,7 @@ To show that any forecaster is strongly incentivized to report truthfully, we si
 % \subsection{Truthfulness for multiple events}
 \begin{theorem}
   \label{shelf_bound}
-    $m_\delta(\shelf, n, \epsilon) \leq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta}$
+    $m_\delta(\shelf, n, \epsilon) \leq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta}$.
 \end{theorem}
 \emph{Proof:} This proof is a slight modification of the proof of Theorem 8 in \cite{elf}.
 
