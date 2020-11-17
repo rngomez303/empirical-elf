@@ -66,25 +66,40 @@ keywords: event, forecast, voting
 
 EFV
 
+\section{Model and Definitions}
+Our model will consist of $n$ forecasters s.t. $n \ge 2$ where $i \in [1,n]$ denotes the $i$th forecaster, $m$ independent events where $k \in [1,m]$ denotes the $k$th event. Each event $k \in [1,m]$ will be associated with a random variable $X_k$. $X_k = 1$ will denote that event $k$ occurred, and, likewise, $X_k = 0$ will denote event $k$ did not occur. $\forall k \in [m] \exists \theta_k$ s.t. $\theta_k$ denotes the true, unknown probability of event $k$ occurring;  $\theta_k = P(X_k = 1) = 1 - P(X_k = 0)$. We will denote each outcome drawn as $x_i \sim X_i$. For each forecaster $i$, we denote their true belief that event $k$ will occur as $\hat{\theta}_{i,k} \in (0,1)$. We then denote $y_{i,k} \in [0,1]$ as the actual report forecaster $i$ makes for event $k$. Note that $y_{i,k}$ need not equal $\hat{\theta}_{i,k}$. \\
 
-\section{Definitions}
-The definitions borrow heavily in both content and organization from previous work \cite{elf}.
+After every event $k \in [1,m]$ has occurred, and thus each forecaster has reported $y_{i,k} \forall i f\forall k$, a mechanism will select exactly one forecaster from the set of $[n]$ as the 'best forecaster'.\\
 
-We model a forecasting competition as $m$ independent events denoted by the independent binary random variables $X_k \in \{0, 1\}$ for $1 \leq k \leq m$. Specifically, let $\theta_k = P(X_k = 1) = 1 - P(X_k = 0)$. For each event, we draw the outcome for the event $x_k \sim X_k$. We say event $k$ occurs when and only when $x_i = 1$. There are $n$ participants in the forecasting competition. Each forecaster independently submits a vector of predictions $y_i \in [0, 1]^m$, such that $y_{i, k}$ is forecaster $i$'s estimate of $\theta_k$. We call these $y_i$ the forecasts of the $i$th forecaster.
+\textbf{Definition 1: Forecaster Selection Mechanism:}\\
+Some mechanism $M(y, x)$ that maps the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_k)$ to an index $w \in [1, n]$. We say that forecaster $w$ wins the competition if $M(y, x) = w$.\\
 
-A forecasting mechanism $M(y, x)$ maps the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_k)$ to an index $w \in [1, n]$. We say that forecaster $w$ wins the competition if $M(y, x) = w$. Next, we consider some properties that an ideal mechanism would have. 
+We call a forecaster selection mechanism truthful iff, for all forecasters, their probability of winning is maximized when they reports their beliefs as their forecasts.\\
 
-We call a mechanism truthful iff, for all forecasters, their probability of winning is maximized when they reports their beliefs as their forecasts. Specifically, let $\hat{\theta}_{i, k}$ be forecaster $i$'s belief of the value $\theta_k$. We say that $M$ is truthful if for any $y_i \neq \hat \theta_{i}$,
+\textbf{Definition 2: Truthful:}\\
+$M$ is truthful iff $\forall i \in [n]$, $\forall \hat{\theta}_i$, $\forall y^{\prime}_i \neq \hat{\theta}_i$, and $\forall y_j s.t. j \neq i$,
 \[ P(M( (y_1, ..., \hat \theta_i, .., y_n), x ) = i) \geq  P(M( (y_1, ..., \hat y_i, .., y_n), x ) = i)\]
-and we say $M$ is strictly truthful if the strict inequality holds. 
+\textbf{Note:} $M$ is strictly truthful if the strict inequality inequality holds.\\
 
-Additionally, we would like our mechanism to choose the forecaster with the best predictions. We define the accuracy of a single forecaster $i$ as 1 minus the average squared loss of their forecasts compared to the true probabilities. Specifically, $a_i = 1 - \frac{1}{m}\sum_{k=1}^m (y_{i, k} - \theta_k)^2$. An ideal mechanism would choose forecasters with larger accuracies with higher probabilities. Let $i^* = \argmax_i a_i$ be the highest accuracy forecaster, and let $a^* = a_{i^*}$. We call $\epsilon = a^* - \max_{i \neq i^*} a_i$ the accuracy gap. $\epsilon$ is the difference in accuracy between the best and second best forecaster. 
+Additionally, we would like our mechanism to choose the forecaster with the best predictions. We define the accuracy of a single forecaster $i$ as 1 minus the average squared loss of their forecasts compared to the true probabilities.\\
 
-For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster. 
+\textbf{Definition 3: Accuracy:}\\
+$a_i = 1 - \frac{1}{m}\sum_{k=1}^m (y_{i, k} - \theta_k)^2$.\\
 
-define proper scoring rule
-Let $p$ denote belief and $y$ denote report
-A scoring rule R is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$
+An ideal mechanism would choose forecasters with larger accuracies with higher probabilities. Let $i^* = \argmax_i a_i$ be the highest accuracy forecaster, and let $a^* = a_{i^*}$.\\
+
+\textbf{Definition 4: Accuracy Gap:}\\
+$\epsilon = a^* - \max_{i \neq i^*} a_i$ denote the accuracy gap.\\
+
+For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster.\\
+
+Similar to work in [ELF Citation], we will focus on using the \textbf{proper scoring rule}, the \textbf{quadratic scoring rule} in our forecaster selection mechanism.\\
+
+\textbf{Definition 5: Proper Scoring Rule}:\\
+Scoring rule, $R$ is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$\\
+
+\textbf{Definition 6: Quadratic Scoring Rule}:\\
+$R_q = 1 - (y - x)^2$; Where $x$ denotes the observed outcome, and $y$ denotes the report.
 
 \section{Simple average mechanism}
 A simple selection mechanism that is often done in practice, we will call the simple average mechanism $M_s$. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $M_s(y, x) = \argmax_i F_i$. The idea of this mechanism is that each forecaster's final score in this mechanism is $F_i = \sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_i = \sum_{k=1}^m 1 - (y_{i, k} - \theta_k)^2$. Therefore, the forecaster with the highest score will correlate to the forecaster with the highest accuracy. However, we will show that this is not necessarily the case. 
@@ -158,6 +173,7 @@ Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon
 For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with probability $R_q(y_{i, k}, x_i)$, and 0 otherwise. Then, for each event $k$ we assign forecaster $i$ the score $f_{i, k} = X_{i, k}$ obtained by sampling this variable. Finally, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$, then chose the forecaster with the highest score $\shelf(y, x) = \argmax_i F_i$, breaking ties uniformly at random. 
 
 \subsection{Truthfulness}
+Note: The following analysis is inspired by and follows the work done in [ELF Citation].\\\\
 For a single event with true probability $\theta$, every forecaster will either win 1 or 0 events. The probability that their final score is 1 will just be their expected score for the single event. Therefore, to maximize their final score, each forecaster must maximize their expected score for the single event. Their score is just $\E_{x \sim \theta}(R_q(y_i, x)) = \E_{x \sim \theta}(1 - (y_i - x)^2)$. This is maximized when $y_i = \theta$, so the mechanism is truthful. (what theorem 4 does) We can also see this directly be noting that $R_q$ is a strictly proper scoring rule, so its expectation is maximized when $y_i = \theta$. 
 
 \begin{theorem}
