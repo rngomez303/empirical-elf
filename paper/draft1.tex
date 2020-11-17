@@ -59,22 +59,21 @@
 
 
 \section{Definitions}
-We model a forecasting competition as $m$ independent events denoted by the independent binary random variables $X_i \in \{0, 1\}$ for $1 \leq i \leq m$. Specifically, let $\theta_i = P(X_i = 1) = 1 - P(X_i = 0)$. For each event event, we draw the outcome for the event $x_i \sim X_i$. We say event $i$ occurred when and only when $x_i = 1$. 
+We model a forecasting competition as $m$ independent events denoted by the independent binary random variables $X_k \in \{0, 1\}$ for $1 \leq k \leq m$. Specifically, let $\theta_k = P(X_k = 1) = 1 - P(X_k = 0)$. For each event, we draw the outcome for the event $x_k \sim X_k$. We say event $k$ occurs when and only when $x_i = 1$. There are $n$ participants in the forecasting competition. Each forecaster independently submits a vector of predictions $y_i \in [0, 1]^m$, such that $y_{i, k}$ is forecaster $i$'s estimate of $\theta_k$. We call these $y_i$ the forecasts of the $i$th forecaster.
 
-define selection mechanism
+A forecasting mechanism $M(y, x)$ maps the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_k)$ to an index $w \in [1, n]$. We say that forecaster $w$ wins the competition if $M(y, x) = w$. Next, we consider some properties that an ideal mechanism would have. 
 
-define accuracy
+We call a mechanism truthful iff, for all forecasters, their probability of winning is maximized when they reports their beliefs as their forecasts. Specifically, let $\hat{\theta}_{i, k}$ be forecaster $i$'s belief of the value $\theta_k$. We say that $M$ is truthful if for any $y_i \neq \hat \theta_{i}$,
+\[ P(M( (y_1, ..., \hat \theta_i, .., y_n), x ) = i) \geq  P(M( (y_1, ..., \hat y_i, .., y_n), x ) = i)\]
+and we say $M$ is strictly truthful if the strict inequality holds. 
+
+Additionally, we would like our mechanism to choose the forecaster with the best predictions. We define the accuracy of a single forecaster $i$ as 1 minus the average squared loss of their forecasts compared to the true probabilities. Specifically, $a_i = 1 - \frac{1}{m}\sum_{k=1}^m (y_{i, k} - \theta_k)^2$. An ideal mechanism would choose forecasters with larger accuracies with higher probabilities. Let $i^* = \argmax_i a_i$ be the highest accuracy forecaster, and let $a^* = a_{i^*}$. We call $\epsilon = a^* - \max_{i \neq i^*} a_i$ the accuracy gap. $\epsilon$ is the difference in accuracy between the best and second best forecaster. 
+
+For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster. 
 
 define proper scoring rule
 Let $p$ denote belief and $y$ denote report
 A scoring rule R is proper if $\forall p,y \in {0,1}, E_{x~p}[R(p,x)] \ge E_{x~p}[R(y,x)]$
-
-define truthful mechanism
-A scoring mechanism is truthful iff, for all forecasters, their respective probability of being selected as the best overall forecaster is maximized when their reports match their beliefs for all events. 
-
-define accuracy gap
-
-define $m_\delta$
 
 \section{Simple average mechanism}
 The simplest selection mechanism (and what is often done in practice), we call the simple average mechanism. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $\argmax_i F_i$. Each forecaster's cumulative score in this mechanism $\sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_j = \sum_{i=1}^m 1 - (y_{i, j} - \theta_j)^2$. However, we will show that this approximation can be flawed.
