@@ -243,7 +243,7 @@ Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon
   \label{elf_lower_bound}
     For $\delta < \frac{1}{2}$, $m_\delta(\elf, n, \epsilon) > n \log n$
 \end{theorem}
-\emph{Proof:} Pick some $\delta < \frac{1}{2}$ and consider the case where $m = n \log n$ and $\theta_k = 1$ for every event. Let $y_{1, k} = 1$ and $y_{i, k} = 0$ for every $i > 1$. Therefore, forecaster 1 always forecasts correctly and has a quadratic score $R_q(1, 1) = 1$ for each event, while everyone else is wrong and has a quadratic score of $R_q(0, 1) = 0$ for each event. Then, $a_1 = 1$, and $a_i = 0$ for $i > 1$, so we have the worst possible accuracy gap $\epsilon = 1$.
+\emph{Proof:} Pick any $\delta < \frac{1}{2}$, $0 < c \leq 1$ and consider the case where $m = c n \log n$ and $\theta_k = 1$ for every event. Let $y_{1, k} = 1$ and $y_{i, k} = 0$ for every $i > 1$. Therefore, forecaster 1 always forecasts correctly and has a quadratic score $R_q(1, 1) = 1$ for each event, while everyone else is wrong and has a quadratic score of $R_q(0, 1) = 0$ for each event. Then, $a_1 = 1$, and $a_i = 0$ for $i > 1$, so we have the worst possible accuracy gap $\epsilon = 1$.
 
 For every event, forecaster 1's score will be 
 \begin{align*}
@@ -255,22 +255,36 @@ Since all the other forecasters are symmetric, their $f_i$ must all be the same,
 
 We can reframe the way winners are chosen for each event. Instead of holding a lottery, we first flip a coin that gives forecaster 1 a win with probability $\frac{2}{n}$. If it does not give them the win, we run a normal lottery for the remaining forecasters, where they each have probability $\frac{1}{n-1}$ of winning. This gives them an overall probability of $\frac{n-2}{n(n-1)}$ to win each event, so it is the same the original lottery. 
 
-Since all the events are uniform, the expected number of lotteries forecaster 1 will win is $m f_1 = \frac{2m}{n} = 2 \log n$. Specifically, their wins will follow the Bernoulli distribution $B(n, \frac{2}{n})$. With some probability $C_1 = P(B(n, \frac{2}{n}) < 2\log n) \approx \frac{1}{2}$, forecaster 1 will win less events than expected. 
+Since all the events are uniform, the expected number of lotteries forecaster 1 will win is $m f_1 = \frac{2m}{n} = 2 c \log n$. Specifically, their wins will follow the Bernoulli distribution $B(m, \frac{2}{n})$. With some probability $C_1 = P(B(m, \frac{2}{n}) < 2 c \log n) \approx \frac{1}{2}$, forecaster 1 will win less events than expected. 
 
 The distribution of wins for the remaining forecasters will follow a uniform multinomial distribution. Specifically, we can model it with Balls and Bins. Let $M$ be the maximum number of wins of any of the remaining forecasters. 
 \begin{lemma}
-    $P(M > 2 \log n) = 1 - o(1)$.
+    $P(M > 2 c \log n) = 1 - o(1)$ for any $0 < c \leq 1$.
 \end{lemma}
 \emph{Proof:}
-From Theorem 1 of \citet{raab1998balls}, we know that for $m = n \log n$, $P(M > k_\alpha) = 1 - o(1) > C_2$ for some constant $C_2$, where $c = \frac{m}{n\log n}$, $k_\alpha = (d_c - 1 + \alpha) \log n$, and $0 < 1 < \alpha$, such that $d_c$ is the larger solution of $1 + x(\log c - \log x + 1) - c= 0$.
+From Theorem 1 of \citet{raab1998balls}, we know that for $m = c n \log n$, $P(M > k_\alpha) = 1 - o(1)$, where $k_\alpha = (d_c - 1 + \alpha) \log n$, and $0 < 1 < \alpha$, such that $d_c$ is the solution of $1 + x(\log c - \log x + 1) - c= 0$ such that $x > c$.
 
-In our case, $c = 1$, so $d_c$ is the solution to $x (1 - \log x) = 0$. Therefore, $d_c = e$. Since this inequality holds for any $\alpha$, we let $\alpha = 3 - e$. Plugging in both values gives us $k_\alpha = 2 \log n$, so $P(M > 2 \log n) = 1 - o(1)$. \hfill \QED
+If $c = 1$, this reduces to $d_1 (1 - \log d_1) = 0$, so $d_1 = e$. Since this inequality holds for any $\alpha$, we let $\alpha = 3 - e$. Plugging in both values gives us $k_\alpha = 2 \log n$, so $P(M > 2 \log n) = 1 - o(1)$.
 
-Using the lemma, for any $C_2 < 1$ and sufficiently large $n$, $P(M > 2 \log n) > C_2$. We choose some $C_2 > 2\delta$. Now, the probability that forecaster 1 is not chosen is at least
+We can then rewrite the equation that determines $d_c$ as $1 + \frac{1}{x} = \frac{c}{x} - \log \frac{c}{x} $. $\frac{d}{dx}$ of the left hand side is $-\frac{1}{x^2} < 0$ while the right hand side is $\frac{x-c}{x^2} > 0$, since we are only considering the solution where $x > c$. For any $c < 1$, $x = ce$ will not satisfy the equation, since the right hand side remains constant while the left is increasing from our $d_1$ solution. In order for the left side to decrease and the right side to increase, $x$ must increase. Therefore, $d_c > ce$ for $0 < c < 1$. 
+
+Letting $\alpha = \max (c (2-e) + 1, 0)$, we have
 \[
-  P(B(n, \frac{2}{n}) < 2\log n) \times P(M > 2 \log n) > \frac{1}{2} \times 2\delta = \delta
+k_\alpha = (d_c - 1 + \alpha) \log n > (ce - 1 + c (2-e) + 1) \log n = 2c \log n \:.
 \]
-Therefore, it is not true that for any $n$, $\epsilon$, $P(\elf(y, x) \neq i^*) \leq \delta$ when $m = n \log n$. Therefore, $m_\delta(\elf, n, \epsilon) > n \log n$. 
+We can again apply Theorem 1 of \citet{raab1998balls} to get
+\[
+P(M > 2 c \log n) > P(M > k_\alpha) = 1 - o(1)
+\]
+for any $c < 1$. Therefore, for any $c \leq 1$, $P(M > 2 c \log n) = 1 - o(1)$. \hfill \QED
+
+Using the lemma, for any $C_2 < 1$ and sufficiently large $n$, $P(M > 2 c \log n) > C_2$. We choose some $C_2 > 2\delta$. Now, the probability that forecaster 1 is not chosen is at least
+\[
+  P\left(B\left(m, \frac{2}{n}\right) < 2c \log n\right) \times P(M > 2 c \log n) > \frac{1}{2} \times 2\delta = \delta
+\]
+Therefore, it is not true that for any $n$, $\epsilon$, $P(\elf(y, x) \neq i^*) \leq \delta$ when $m = c n \log n$. Therefore, $m_\delta(\elf, n, \epsilon) \neq c n \log n$ for any $c < 1$. 
+
+Therefore, $m_\delta(\elf, n, \epsilon) > n \log n$. 
 \hfill \QED
 
 \section{SHELF}
