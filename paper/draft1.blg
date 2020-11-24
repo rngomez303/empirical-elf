@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2016)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: draft1.aux
+The style file: plainnat.bst
+Database file #1: references.bib
+Warning--I didn't find a database entry for "Bo:todo-cite-or-reference"
+You've used 3 entries,
+            2773 wiz_defined-function locations,
+            617 strings with 5578 characters,
+and the built_in function-call counts, 1662 in all, are:
+= -- 153
+> -- 90
+< -- 3
++ -- 30
+- -- 27
+* -- 128
+:= -- 248
+add.period$ -- 11
+call.type$ -- 3
+change.case$ -- 18
+chr.to.int$ -- 3
+cite$ -- 6
+duplicate$ -- 76
+empty$ -- 137
+format.name$ -- 34
+if$ -- 356
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 3
+newline$ -- 24
+num.names$ -- 12
+pop$ -- 35
+preamble$ -- 1
+purify$ -- 15
+quote$ -- 0
+skip$ -- 64
+stack$ -- 0
+substring$ -- 71
+swap$ -- 14
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 33
+warning$ -- 0
+while$ -- 14
+width$ -- 0
+write$ -- 50
+(There was 1 warning)

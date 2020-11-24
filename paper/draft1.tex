@@ -1,9 +1,13 @@
 \documentclass[letterpaper,12pt]{article}
 
-\usepackage[margin=1.5in]{geometry}
+%\usepackage[margin=1.5in]{geometry}
+\usepackage{fullpage}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{bbm}
+\usepackage{amsthm}
+\usepackage[authoryear]{natbib}
+
 \usepackage{mathrsfs}
 \usepackage{mathtools}
 \usepackage{parskip}
@@ -47,16 +51,21 @@
 
 \begin{document}
 
-% \title{ELF}
-% \author{Anish Thilagar}
-% \date{\today}
-% \maketitle
+\title{Efficient and Truthful Forecasting Competitions}
+\author{Rafael Frongillo, Robert Gomez, Anish Thilagar, Bo Waggoner}
+\date{\today}
+\maketitle
 
 
-% \begin{abstract}
- 
-% \end{abstract}
-\section{Name???}
+\begin{abstract}
+   \citet{witkowski2018incentive} studied competitions among forecasters who predict a set of common events.
+   When such a competition picks a single winner, incentives can be distorted, so that paper introduced the ELF mechanism which incentivizes truthful forecasts.
+   In this paper, we give a tighter analysis of the ELF mechanism, then give a mechanism that improves upon it exponentially, in the sense of also being truthful but requiring only logarithmically many events in order to select the best forecaster with high probability.
+   These results have potential applications to machine-learning competitions such as Kaggle, where winners are currently selected in non-truthful ways. 
+\end{abstract}
+
+
+\section{Introduction}
 - SHELF\\
 - GNOME\\
 - ???
@@ -73,7 +82,7 @@ After every event $k \in [1,m]$ has occurred, and thus each forecaster has repor
 
 \begin{definition}
   \label{mechanism}
-  A \textbf{selection mechanism} $M(y, x)$ is a map from the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_m)$ to an index $w \in [1, n]$.
+  A \textbf{selection mechanism} $M(y, x)$ is a map from the forecasts $y = (y_1, ..., y_n)$ and outcomes of the events $x = (x_1, ..., x_k)$ to an index $w \in [1, n]$.
 \end{definition}
 We say that forecaster $w$ wins the competition if $M(y, x) = w$. We call a forecaster selection mechanism truthful iff, for all forecasters, their probability of winning is maximized when they reports their beliefs as their forecasts.
 
@@ -97,10 +106,9 @@ An ideal mechanism would choose forecasters with larger accuracies with higher p
   The \textbf{accuracy gap} $\epsilon = a^* - \max_{i \neq i^*} a_i$ is the difference in accuracy of the first and second best forecasters.
 \end{definition}
 
-% For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. 
-Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to stably pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster.
+For a given mechanism $M$ and $n$ forecasters with accuracy gap $\epsilon$, we let $m_\delta$ be the minimum number of events such that $M$ necessarily chooses $i^*$ with probability at least $1 - \delta$. Specifically, for any $m > m_\delta(M, n, \epsilon)$, $P(M(y, x) \neq i^*) \leq \delta$. $m_\delta$ gives us a measure of how many events are needed for a mechanism to pick the best forecaster. We will use it as a metric to compare mechanisms, where we say $M$ is more efficient than $M'$ if $m_\delta(M, n, \epsilon) < m_\delta(M', n, \epsilon)$, since $M$ needs less events to consistently pick the best forecaster.
 
-Similar to work in \cite{elf}, we will focus on using the proper scoring rule, the quadratic scoring rule in our forecaster selection mechanism.
+Similar to work in \cite{witkowski2018incentive}, we will focus on using the proper scoring rule, the quadratic scoring rule in our forecaster selection mechanism.
 
 \begin{definition}
   \label{scoring_rule}
@@ -112,43 +120,96 @@ Similar to work in \cite{elf}, we will focus on using the proper scoring rule, t
   The \textbf{quadratic scoring rule}, is $R_q = 1 - (y - x)^2$, where $x$ denotes the observed outcome, and $y$ denotes the report.
 \end{definition}
 
+\subsection{Useful facts}
+Bo: TODO name this subsection better.
+
+The following facts, easy to derive and used by \citet{witkowski2018incentive}, will be useful to us as well.
+
+\begin{lemma} \label{lemma:score-accuracy}
+  The expected score, from the ground truth point of view, of forecaster $i$ on event $k$ is $1 - \theta_k(1-\theta_k) - (y_{i,k} - \theta_k)^2$.
+\end{lemma}
+\begin{proof}
+By definition, the expected score is
+\begin{align*}
+  &\theta_k \left[1 - (1 - y_{i,k})^2\right] + (1 - \theta_k) \left[1 - y_{i,k}^2\right]  \\
+  &= \theta_k \left[2y_{i,k} - y_{i,k}^2\right] + (1-\theta_k)\left[1 - y_{i,k}^2\right]  \\
+  &= 1 - \theta_k + 2 \theta_k y_{i,k} - y_{i,k}^2  \\
+  &= 1 - \theta_k + \theta_k^2 - (y_{i,k} - \theta_k)^2 .
+\end{align*}
+\end{proof}
+
+Averaging over events, we get that $i$'s score on average over the $m$ events, in expectation, is exactly her accuracy minus some penalty term that only depends on how extreme the ground truth events are.
+\begin{corollary} \label{cor:avg-score-accuracy}
+  The expectation of forecaster $i$'s average score on all events, from the ground truth point of view, is $a_i - \frac{1}{m}\sum_{k=1}^m \theta_k (1 - \theta_k)$, where $a_i$ is $i$'s accuracy.
+\end{corollary}
+
+We also immediately obtain:
+\begin{corollary} \label{cor:diff-score-accuracy}
+  The expected difference in average scores of forecaster $i$ and $j$, from a ground truth point of view, is $a_i - a_j$.
+\end{corollary}
+
 \section{Simple average mechanism}
-A simple selection mechanism that is often done in practice, we will call the simple average mechanism $M_s$. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $M_s(y, x) = \argmax_i F_i$. The idea of this mechanism is that each forecaster's final score in this mechanism is $F_i = \sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_i = \sum_{k=1}^m 1 - (y_{i, k} - \theta_k)^2$. Therefore, the forecaster with the highest score will correlate to the forecaster with the highest accuracy. However, we will show that this is not necessarily the case. 
+A straightforward selection mechanism often used in practice is what we call the \emph{simple average mechanism} $M_s$. For this mechanism, we assign each forecaster a score $f_{i, k} = R_q(y_{i, k}, x_k)$ for each event. Then, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$. Finally, we choose the forecaster with the highest cumulative score $M_s(y, x) = \argmax_i F_i$.
+
+%%%% Bo: this is good, but I thought we don't need this detail.
+%The idea of this mechanism is that each forecaster's final score in this mechanism is $F_i = \sum_{i=1}^m 1 - (y_{i, j} - x_i)^2$ is an analog for their cumulative accuracy, $m a_i = \sum_{k=1}^m 1 - (y_{i, k} - \theta_k)^2$. Therefore, the forecaster with the highest score will correlate to the forecaster with the highest accuracy. However, we will show that this is not necessarily the case. 
 
 \subsection{Truthfulness}
-This mechanism is not truthful, as we can see with a few counterexamples. First, consider the case of a single event with $\theta = 0.9$, with $n = 2$. If both forecasters correctly report $0.9$, they will each with with probability $\frac{1}{2}$. However, if either of them deviates and reports some $y > 0.9$, they will win whenever $x = 1$. This happens with probability 0.9, so it increases their probability of winning. Therefore, this is an advantageous misreport, so $M_s$ is not truthful. 
 
-This extends to multiple events as well. If event 1 is the event given above, and for every subsequent event both forecasters report the same $y$, their overall score will be the same for all events but the first one, so that will determine the winner. Therefore, the untruthful forecaster will still have an advantage, so $M_s$ is not truthful for multiple events either. 
+%show simple counterexample(s?) \\
+%- single event favors extremes \\
+%- multiple events can be dominated by single untruthful event when rest are isomorphic \\
 
-\subsection{Accuracy}
-Even though $M_s$ is not truthful, we assume that forecasters still report their true beliefs $\hat \theta_i$. For a single event, the most extreme forecasters will always get selected. For example, if the single outcome is $x = 0$, the forecaster with the minimum $\hat \theta_i $ will have the highest score, so they will always win. Similarly if $x = 1$, the highest belief forecaster will always win. 
+As observed by \citet{witkowski2018incentive} and discussed in depth by \citet{lichtendahl2007probability}, this mechanism is generally not truthful. We can consider a simple example with three forecasters and one event, whose true probability is $0.5$.
+Alice predicts $0.5$, but Bob predicts $1$ and Charlie predicts $0$.
+Observe that Alice \emph{cannot win}, despite being the best forecaster by far: either the event occurs (Bob wins) or it doesn't (Charlie wins).
+She can only win be predicting either $0$ or $1$, raising her probability of winning from $0$ to $0.25$, assuming a random tiebreaking rule.
 
-However, for multiple events, the averaging starts to favor more forecasters. We will see that we get a similar $m_\delta$ as the SHELF mechanism introduced later, assuming the forecasters remain truthful. In fact, the main advantage of SHELF is that it is as efficient as $M_s$ while also being truthful.
+\subsection{Efficiency}
+Although the simple average mechanism is not truthful, it is worth studying its efficiency because, intuitively, it seems unlikely to do better using a mechanism that relies on the quadratic scores of the participants.
+So as a benchmark for truthful quadratic-score-based mechanisms, let us consider the efficiency of $M_s$ if forecasters were to report their true beliefs $\hat \theta_i$.
+
+For a single event, the most extreme forecasters will always get selected, as in the example above.
+However, for multiple events, the averaging starts to favor more accurate forecasters.
+In fact, one can show that with $n$ forecasters and an accuracy gap of $\epsilon$, only
+
+  \[ m = \frac{2}{\epsilon^2}\ln\left(\frac{n}{\delta}\right) \]
+events suffice to select the best forecaster with probability $1-\delta$.
+
+Sketch (similar to the \citet{witkowski2018incentive} analysis of ELF): Let $i$ be the best forecaster.
+She beats some competitor $j$ if she has a higher average score in the competition.
+The expected difference in average scores is the difference in accuracies (Corollary \ref{cor:diff-score-accuracy}), which is $a_i - a_j \geq \epsilon$.
+On any given event, the difference in scores is an independent random variable bounded in $[-1,1]$.
+A standard Hoeffding bound \cite{Bo:todo-cite-or-reference}  shows that the average of $m = \frac{2}{\epsilon^2}\ln\tfrac{n}{\delta}$ such variables is at least $\epsilon$ below its mean with probability $1 - \tfrac{\delta}{n}$.
+Complete the argument by taking a union bound over all $n-1 \leq n$ opponents $j$.
+
+This shows that it is possible to select the best forecaster using a number of events only logarithmic in $n$, the number of forecasters -- if truthfulness is not required.
+We next consider the number of events used by the ELF mechanism.
 
 \section{ELF}
 \newcommand{\elf}{M_{\mathrm{ELF}}}
-The ELF mechanism $\elf$ \cite{elf}, improves upon $M_s$, by incentivizing forecasters to be truthful. For each event $k$, we hold a lottery to choose a winner. Forecaster $i$ is chosen with probability
+The ELF mechanism $\elf$ \citep{witkowski2018incentive}, improves upon $M_s$, by incentivizing forecasters to be truthful. For each event $k$, we hold a lottery to choose a winner. Forecaster $i$ is chosen with probability
 \[ f_{i, k} = \frac{1}{n} + \frac{1}{n} \left(R_q(y_{i, k}, x_k) - \frac{\sum_{j\neq i} R_q(y_{j, k}, x_k)}{n-1} \right)\]
 This score is the additively normalized quadratic score among all forecasters. A forecaster increasing their own quadratic score increases the chances they win an event, while decreasing the chances others win that event. Let $w_k$ be the winner of event $k$. Then we choose the forecaster $\elf(y, x) = \argmax_i \sum_{k=1}^m \1(w_k = i)$ as the winner of the competition. Essentially, we give the winner of each event lottery a point, and then pick the forecaster who got the most points as the overall winner.
 
-In Theorem 6 of \cite{elf}, it is proven that $\elf$ is strictly truthful. In Theorem 8 of the same paper, they also upper bound $m_\delta$ by showing 
+In Theorem 6 of \cite{witkowski2018incentive}, it is proven that $\elf$ is strictly truthful. In Theorem 8 of the same paper, they also upper bound $m_\delta$ by showing 
 \[ m_\delta(\elf, n, \epsilon) \leq \frac{2(n-1)^2}{\epsilon^2} \ln \left(\frac{4(n-1)}{\delta}\right)\]
 For a fixed forecaster accuracy gap and desired mechanism accuracy, the number of events ELF needs to consistently choose the right forecaster is proportional to $\frac{1}{\epsilon^2} n^2 \ln n$. However, this upper bound is not tight. 
 
-Let $F_{i, k}$ be the indicator function for forecaster $i$ winning the lottery for event $k$. Then, $F_i = \sum_k F_{i, k}$ is the random variable that is the number of events forecaster $i$ wins. The proof of Theorem 8 \cite{elf} utilized the Hoeffding bound applied to $F_i$, which assumes they have high variance. However, this is not the case, and utilizing that fact gives an improvement in the lower bound. 
+Let $F_{i, k}$ be the indicator function for forecaster $i$ winning the lottery for event $k$. Then, $F_i = \sum_k F_{i, k}$ is the random variable that is the number of events forecaster $i$ wins. The proof of Theorem 8 \cite{witkowski2018incentive} utilized the Hoeffding bound applied to $F_i$, which assumes they have high variance. However, this is not the case, and utilizing that fact gives an improvement in the lower bound. 
 \begin{theorem}[Bernstein's Inequality]
   \label{bernstein}
   Given random variables $X_i$ for $1 \leq i \leq n$ such that $0 \leq X_i \leq 1$ almost surely, let $S = \sum_i X_i$. Then,
-  \[ P\left(|S - \E[S]| < t\right) < 2 \: e^{\frac{-t^2 }{2\left(\Var(S) + \frac{t}{3}\right)} } ~.\]
+  \[ P\left(|S - \E[S]| < t\right) < 2 \: e^{\frac{-t^2 }{2\left(\Var(S) + \frac{t}{3}\right)} } \]
 \end{theorem}
 \begin{theorem}
   \label{elf_bound}
-    $m_\delta(\elf, n, \epsilon) \leq \frac{5(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right)$ ~.
+    $m_\delta(\elf, n, \epsilon) \leq \frac{5(n-1)}{\epsilon^2}\ln\left(\frac{4(n-1)}{\delta}\right)$
     % For an accuracy gap $\epsilon$, ELF correctly chooses the most accurate forecaster with probability at least $1 - 4 (n-1) e^{-\frac{m \epsilon}{6(n - 1)}}$.
 \end{theorem}
 \emph{Proof:} Note that for any single event $k$, every forecaster wins with probability at best $\frac{2}{n}$, and at worst $\frac{1}{n} - \frac{1}{n(n-1)}$ (achieved when $y_i = 1$, $y_{j\neq i} = 0$, and $x_i = 1$). Since $F_{i, k}$ is just a binary random variable, it will have highest variance when it's expectation is as close to $\frac{1}{2}$ as possible. For nontrivially small $n$, this will mean its expectation is $\frac{2}{n}$ (or equivalently $P(F_{i, k} = 1) = \frac{2}{n}$), so its variance will be at most $\frac{2(n-2)}{n^2}$. So we have $\Var(F_{i, k}) \leq \frac{2(n-2)}{n^2} < \frac{2}{n}$. 
 
-Since $F_i = \sum_k F_{i, k}$, we have $\Var(F_i) = \sum_k \Var(F_{i, k}) < \sum_k \frac{2}{n} = \frac{2m}{n}$. As shown in [elf paper], for $j\neq i$ we have 
+Since $F_i = \sum_k F_{i, k}$, we have $\Var(F_i) = \sum_k \Var(F_{i, k}) < \sum_k \frac{2}{n} = \frac{2m}{n}$. As shown in \citet{witkowski2018incentive}, for $j\neq i$ we have 
 \[ \E[F_i] - \E[F_j] \geq \frac{m \epsilon}{n - 1}\]
 Therefore, if $F_j \geq F_i$, (forecaster $j$ beats forecaster $i$), then either forecaster $j$ overperformed their expectation by at least $\frac{m \epsilon}{2(n - 1)}$, or forecaster $i$ underperformed their expectation by $\frac{m \epsilon}{n - 1}$. Specifically, either $\E[F_i] - F_i \geq \frac{m \epsilon}{2(n - 1)}$ or $F_j - \E[F_j] \geq \frac{m \epsilon}{2(n - 1)}$
 
@@ -180,7 +241,7 @@ Assigning this probability to $1 - \delta$, we see that for a fixed $n, \epsilon
 
 \begin{theorem}
   \label{elf_lower_bound}
-    For $\delta < \frac{1}{2}$, $m_\delta(\elf, n, \epsilon) > n \log n$.
+    For $\delta < \frac{1}{2}$, $m_\delta(\elf, n, \epsilon) > n \log n$
 \end{theorem}
 \emph{Proof:} Pick some $\delta < \frac{1}{2}$ and consider the case where $m = n \log n$ and $\theta_k = 1$ for every event. Let $y_{1, k} = 1$ and $y_{i, k} = 0$ for every $i > 1$. Therefore, forecaster 1 always forecasts correctly and has a quadratic score $R_q(1, 1) = 1$ for each event, while everyone else is wrong and has a quadratic score of $R_q(0, 1) = 0$ for each event. Then, $a_1 = 1$, and $a_i = 0$ for $i > 1$, so we have the worst possible accuracy gap $\epsilon = 1$.
 
@@ -201,7 +262,7 @@ The distribution of wins for the remaining forecasters will follow a uniform mul
     $P(M > 2 \log n) = 1 - o(1)$.
 \end{lemma}
 \emph{Proof:}
-From Theorem 1 of \cite{bnb}, we know that for $m = n \log n$, $P(M > k_\alpha) = 1 - o(1) > C_2$ for some constant $C_2$, where $c = \frac{m}{n\log n}$, $k_\alpha = (d_c - 1 + \alpha) \log n$, and $0 < 1 < \alpha$, such that $d_c$ is the larger solution of $1 + x(\log c - \log x + 1) - c= 0$.
+From Theorem 1 of \citet{raab1998balls}, we know that for $m = n \log n$, $P(M > k_\alpha) = 1 - o(1) > C_2$ for some constant $C_2$, where $c = \frac{m}{n\log n}$, $k_\alpha = (d_c - 1 + \alpha) \log n$, and $0 < 1 < \alpha$, such that $d_c$ is the larger solution of $1 + x(\log c - \log x + 1) - c= 0$.
 
 In our case, $c = 1$, so $d_c$ is the solution to $x (1 - \log x) = 0$. Therefore, $d_c = e$. Since this inequality holds for any $\alpha$, we let $\alpha = 3 - e$. Plugging in both values gives us $k_\alpha = 2 \log n$, so $P(M > 2 \log n) = 1 - o(1)$. \hfill \QED
 
@@ -218,14 +279,18 @@ Therefore, it is not true that for any $n$, $\epsilon$, $P(\elf(y, x) \neq i^*) 
 For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with probability $R_q(y_{i, k}, x_i)$, and 0 otherwise. Then, for each event $k$ we assign forecaster $i$ the score $f_{i, k} = X_{i, k}$ obtained by sampling this variable. Finally, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$, then chose the forecaster with the highest score $\shelf(y, x) = \argmax_i F_i$, breaking ties uniformly at random. 
 
 \subsection{Truthfulness}
-Note: The following analysis is inspired by and follows the work done in \cite{elf}.\\\\
-For a single event with true probability $\theta$, every forecaster will either win 1 or 0 events. The probability that their final score is 1 will just be their expected score for the single event. Therefore, to maximize their final score, each forecaster must maximize their expected score for the single event. Their score is just $\E_{x \sim \theta}(R_q(y_i, x)) = \E_{x \sim \theta}(1 - (y_i - x)^2)$. This is maximized when $y_i = \theta$, so the mechanism is truthful. (what theorem 4 does) We can also see this directly be noting that $R_q$ is a strictly proper scoring rule, so its expectation is maximized when $y_i = \theta$. 
+Note: The following analysis is inspired by and follows the work done in \citet{witkowski2018incentive}.
+
+
+(This is wrong because we can't just look at their probability of winning a point. We need to also factor in the tiebreaker weighting some wins differently)
+
+For a single event with true probability $\theta$, every forecaster will either win 1 or 0 events. The probability that their final score is 1 will just be their expected score for the single event. Therefore, to maximize their final score, each forecaster must maximize their expected score for the single event. Their score is just $\E_{x \sim \theta}(R_q(y_i, x)) = \E_{x \sim \theta}(1 - (y_i - x)^2)$. This is maximized when $y_i = \theta$, so the mechanism is truthful. We can also see this directly by noting that $R_q$ is a strictly proper scoring rule, so its expectation is maximized when $y_i = \theta$. 
 
 \begin{theorem}
   \label{shelf_truthful}
     $\shelf$ is truthful for $m \geq 1$ events.
 \end{theorem}
-\emph{Proof:} For each forecaster $j \in [1, n]$ fix forecaster's report.
+\emph{Proof:} For each forecaster $j \in [1, n]$ fix their report.
 
 Suppose that for some forecaster $i$, $i$'s report on some subset of events, where $k \in [1, m]$ denotes the size of this subset, does not report their true belief for any of the $k$ events.\\
 Let $k^\prime$ be one of those events.
@@ -260,7 +325,7 @@ To show that any forecaster is strongly incentivized to report truthfully, we si
 
 \subsection{Accuracy}
 
-% From Proposition 2 of \cite{elf}, we have that $E_{x \sim \theta}(R_q(y, x)) = R_q(y, \theta) + \theta^2 - \theta$. Additionally, for a single event, a forecaster's accuracy $a_i$ is by definition just $R_q(y, \theta)$. So, $E_{x \sim \theta}(R_q(y, x)) = a_i + \theta^2 - \theta$. For a single event with probability $\theta$, forecaster $i$'s expected score is $\E_{x \sim \theta} f_i = E_{x \sim \theta}(R_q(y_i, x)) = a_i + \theta^2 - \theta$.
+% From Proposition 2 of \citet{witkowski2018incentive}, we have that $E_{x \sim \theta}(R_q(y, x)) = R_q(y, \theta) + \theta^2 - \theta$. Additionally, for a single event, a forecaster's accuracy $a_i$ is by definition just $R_q(y, \theta)$. So, $E_{x \sim \theta}(R_q(y, x)) = a_i + \theta^2 - \theta$. For a single event with probability $\theta$, forecaster $i$'s expected score is $\E_{x \sim \theta} f_i = E_{x \sim \theta}(R_q(y_i, x)) = a_i + \theta^2 - \theta$.
 
 % \subsection{Truthfulness for a single event}
 % (section 4.3, proposition 5).  For forecaster $i$ to be selected, they either need to have $f_i = 1$, and then be chosen uniformly at random from all others who scored 1, or everyone must score 0 and they will be chosen uniformly at random. In the first case, the expected number of other forecasters who also score 1 is $\sum_{i' \neq i} \E_{x \sim \theta} f_{i'} = \sum_{i' \neq i} (a_{i'} + \theta^2 - \theta) = (n-1) (\theta^2 - \theta) \sum_{i' \neq i} a_{i'}$. Then, the probability that forecaster $i$ is chosen is 
@@ -277,9 +342,9 @@ To show that any forecaster is strongly incentivized to report truthfully, we si
 % \subsection{Truthfulness for multiple events}
 \begin{theorem}
   \label{shelf_bound}
-    $m_\delta(\shelf, n, \epsilon) \leq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta}$.
+    $m_\delta(\shelf, n, \epsilon) \leq \frac{2}{\epsilon^2} \ln \frac{4(n-1)}{\delta}$
 \end{theorem}
-\emph{Proof:} This proof is a slight modification of the proof of Theorem 8 in \cite{elf}.
+\emph{Proof:} This proof is a slight modification of the proof of Theorem 8 in \cite{witkowski2018incentive}.
 
 We first bound the difference in the expected number of wins of $i^*$ and $j$, for any $j \neq i^*$. 
 \begin{align*}
@@ -306,12 +371,13 @@ Letting this quantity be $1 - \delta$ and solving for $m$, we see that this mech
 
 Comparing this to the result of Theorem \ref{elf_bound}, we see that $\shelf$ is much more efficient than $\elf$. We can also directly apply the proof of Theorem \ref{shelf_bound} to $M_s$, since the mean and variance of $F_i$ is the same in both cases. Therefore, $m_\delta(\shelf, n, \epsilon) = m_\delta(M_s, n, \epsilon)$. 
 
+\bibliographystyle{plainnat}
+\bibliography{references}
 
-\begin{thebibliography}{99}
-\bibitem{elf} Witkowski, Freeman  \emph{Incentive-Compatible Forecasting Competitions} \url{https://las.inf.ethz.ch/files/witkowski-etal-aaai2018.pdf}.
-
-\bibitem{bnb} Raab, Steger  \emph{“Balls into Bins” — A Simple and Tight Analysis} \url{http://www.dblab.ntua.gr/~gtsat/collection/scheduling/Balls%20into%20Bins%20A%20Simple%20and%20Tight%20Anal.pdf}.
-
-\end{thebibliography}
+%\begin{thebibliography}{99}
+%\bibitem{elf} Witkowski, Freeman  \emph{Incentive-Compatible Forecasting Competitions} \url{https://las.inf.ethz.ch/files/witkowski-etal-aaai2018.pdf}.
+%
+%\bibitem{bnb} Raab, Steger  \emph{“Balls into Bins” — A Simple and Tight Analysis} \url{http://www.dblab.ntua.gr/~gtsat/collection/scheduling/Balls%20into%20Bins%20A%20Simple%20and%20Tight%20Anal.pdf}.
+%\end{thebibliography}
 
 \end{document}

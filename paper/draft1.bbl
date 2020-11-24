@@ -1,0 +1,31 @@
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Lichtendahl and Winkler(2007)]{lichtendahl2007probability}
+Kenneth~C. Lichtendahl, Jr. and Robert~L. Winkler.
+\newblock Probability elicitation, scoring rules, and competition among
+  forecasters.
+\newblock \emph{Management Science}, 53\penalty0 (11):\penalty0 1745---1755,
+  2007.
+
+\bibitem[Raab and Steger(1998)]{raab1998balls}
+Martin Raab and Angelika Steger.
+\newblock ``balls into bins'' - a simple and tight analysis.
+\newblock In \emph{Proceedings of the Second International Workshop on
+  Randomization and Approximation Techniques in Computer Science}, RANDOM 1998,
+  pages 159--170. Springer-Verlag, 1998.
+\newblock ISBN 3-540-65142-X.
+
+\bibitem[Witkowski et~al.(2018)Witkowski, Freeman, Vaughan, Pennock, and
+  Krause]{witkowski2018incentive}
+Jens Witkowski, Rupert Freeman, Jennifer~Wortman Vaughan, David~M. Pennock, and
+  Andreas Krause.
+\newblock Incentive-compatible forecasting competitions.
+\newblock In \emph{Proceedings of the 32nd AAAI Conference on Artificial
+  Intelligence}, AAAI 2018, 2018.
+
+\end{thebibliography}
