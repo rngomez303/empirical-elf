@@ -42,6 +42,10 @@
 \newcommand{\1}{\mathbbm{1}}
 \newcommand*{\QED}{\hfill\ensuremath{\square}}%
 
+\newcommand{\elf}{M_{\mathrm{ELF}}}
+\newcommand{\shelf}{M_{\mathrm{SHELF}}}
+
+
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}[theorem]{Corollary}
@@ -187,7 +191,6 @@ This shows that it is possible to select the best forecaster using a number of e
 We next consider the number of events used by the ELF mechanism.
 
 \section{ELF}
-\newcommand{\elf}{M_{\mathrm{ELF}}}
 The ELF mechanism $\elf$ \citep{witkowski2018incentive}, improves upon $M_s$, by incentivizing forecasters to be truthful. For each event $k$, we hold a lottery to choose a winner. Forecaster $i$ is chosen with probability
 \[ f_{i, k} = \frac{1}{n} + \frac{1}{n} \left(R_q(y_{i, k}, x_k) - \frac{\sum_{j\neq i} R_q(y_{j, k}, x_k)}{n-1} \right)\]
 This score is the additively normalized quadratic score among all forecasters. A forecaster increasing their own quadratic score increases the chances they win an event, while decreasing the chances others win that event. Let $w_k$ be the winner of event $k$. Then we choose the forecaster $\elf(y, x) = \argmax_i \sum_{k=1}^m \1(w_k = i)$ as the winner of the competition. Essentially, we give the winner of each event lottery a point, and then pick the forecaster who got the most points as the overall winner.
@@ -288,7 +291,6 @@ Therefore, $m_\delta(\elf, n, \epsilon) > n \log n$.
 \hfill \QED
 
 \section{SHELF}
-\newcommand{\shelf}{M_{\mathrm{SHELF}}}
 
 For this mechanism, we let the binary random variable $X_{i, k}$ be 1 with probability $R_q(y_{i, k}, x_i)$, and 0 otherwise. Then, for each event $k$ we assign forecaster $i$ the score $f_{i, k} = X_{i, k}$ obtained by sampling this variable. Finally, we assign their final score by summing these over all events, $F_i = \sum_{j=1}^m f_{i, j}$, then chose the forecaster with the highest score $\shelf(y, x) = \argmax_i F_i$, breaking ties uniformly at random. 
 
@@ -385,6 +387,49 @@ Letting this quantity be $1 - \delta$ and solving for $m$, we see that this mech
 
 Comparing this to the result of Theorem \ref{elf_bound}, we see that $\shelf$ is much more efficient than $\elf$. We can also directly apply the proof of Theorem \ref{shelf_bound} to $M_s$, since the mean and variance of $F_i$ is the same in both cases. Therefore, $m_\delta(\shelf, n, \epsilon) = m_\delta(M_s, n, \epsilon)$. 
 
+\newpage
+\section{Raf notes}
+
+Let's study the one-round version of ELF + SHELF + noise.
+And actually, we won't really need to use SHELF per se.
+Let's actually define
+$M_{f,\sigma}(y,x) = \max_{i\in[n]} f(y,x)_i + X_i$ where the $X_i \sim N(0,\sigma^2)$ are indpendent, and $f$ is any function with $f(y,x) \in [0,m]^n$ where if you change only one entry of $y$ by $c$, then $f$ changes by at most $c^2$.
+(For example, $f$ could be the sum of scores.)
+Let $M_\alpha$ be the mechanism that runs $M_{f,\sigma}$ with probability $\alpha$ and $\elf$ with probability $1-\alpha$.
+
+In what follows, when I omit $x$, I'm implicitly taking the randomness over $x$ into account (from $\theta$).
+Assume $y$ is truthful for forecaster $i$ and $y'$ is any vector that differs only in $i$'s forecast on a particular round.
+And actually let's focus on the case $m=1$, so there is only one round anyway.
+From a direct calculation (see also a Prop.\ in \cite{witkowski2018incentive}), we have, from forecaster $i$'s point of view,
+\begin{align}
+  \Pr[\elf(y)=i] - \Pr[\elf(y')=i] = \tfrac 1 n (y_i - y'_i)^2~,
+\end{align}
+since forecaster $i$ believes $y_i = \theta_1$.
+
+By differential privacy (I have not checked this carefully!), and the fact that $\exp(c) \leq 1+2c$ for $c\in[0,1]$, we have, for each $x$,
+\begin{align}
+  \Pr[M_{f,\sigma}(y',x)=i]
+  & \leq \exp\left( \frac{(y_i-y'_i)^2}{2\sigma^2} \right) \Pr[M_{f,\sigma}(y,x)=i]
+  \\
+  & \leq \left(1 + \frac{(y_i-y'_i)^2}{\sigma^2}\right) \Pr[M_{f,\sigma}(y,x)=i]
+  \\
+  & \leq \Pr[M_{f,\sigma}(y,x)=i] + \frac{(y_i-y'_i)^2}{\sigma^2}~.
+\end{align}
+
+Combining, the probability of $i$ winning for $y$ and $y'$ can be compared as follows.
+\begin{align}
+  &\Pr[M_\alpha(y)=i]-\Pr[M_\alpha(y')=i]\\
+  &=\alpha\left(\Pr[M_{f,\sigma}(y)=i] - \Pr[M_{f,\sigma}(y')=i]\right)\\
+  &\qquad + (1-\alpha)\left(\Pr[\elf(y)=i] - \Pr[\elf(y')=i]\right)~.
+  \\
+  &\geq -\alpha \frac{(y_i-y'_i)^2}{\sigma^2} + (1-\alpha) \frac{(y_i-y'_i)^2}{n}
+  \\
+  &\geq \left((1-\alpha) \frac{1}{n} -\alpha \frac{1}{\sigma^2}\right) (y_i-y'_i)^2~.
+\end{align}
+Thus, setting $\sigma^2 = n \tfrac \alpha {1-\alpha}$ gives truthfulness, e.g.\ $\sigma^2=n$ for $\alpha=\tfrac 1 2$.
+Which is maybe not what we were hoping for, but it's something.
+
+
 \bibliographystyle{plainnat}
 \bibliography{references}
 
@@ -395,3 +440,8 @@ Comparing this to the result of Theorem \ref{elf_bound}, we see that $\shelf$ is
 %\end{thebibliography}
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
